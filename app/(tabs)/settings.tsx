@@ -17,7 +17,9 @@ export default function SettingsScreen() {
           name="chevron.left.forwardslash.chevron.right"
           style={styles.headerImage}
         />
-      }>
+      }
+      headerDisplay={false}
+    >
       <ThemedView style={styles.titleContainer}>
         <ThemedText
           type="title"
