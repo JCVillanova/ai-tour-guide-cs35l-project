@@ -1,59 +1,97 @@
-import { StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { Pressable, StyleSheet } from 'react-native';
 
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
 import { Fonts } from '@/constants/theme';
+
+function InitialScreen({ onPlanTour }: { onPlanTour: () => void }) {
+  return (
+    <ThemedView
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <ThemedView
+        style={{
+          backgroundColor: 'purple',
+          borderRadius: 16,
+        }}
+      >
+        <Pressable
+          onPress={onPlanTour}
+          style={{
+            paddingHorizontal: 32,
+            paddingVertical: 24,
+          }}
+        >
+          <ThemedText
+            style={{
+              fontSize: 18
+            }}
+          >Plan Tour</ThemedText>
+        </Pressable>
+      </ThemedView>
+    </ThemedView>
+  );
+}
+
+function MapIntegratedScreen() {
+  return (
+    <>
+      <ThemedView
+        style={{
+          backgroundColor: 'purple',
+          height: '50%',
+        }}
+      >
+
+      </ThemedView>
+      <ParallaxScrollView
+        headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+        headerImage={<></>}
+        headerDisplay={false}
+      >
+        <ThemedView style={styles.titleContainer}>
+          <ThemedText
+            type="title"
+            style={{
+              fontFamily: Fonts.rounded,
+            }}>
+            Tour
+          </ThemedText>
+        </ThemedView>
+      </ParallaxScrollView>
+    </>
+  );
+}
+
+function DynamicTour() {
+  const [planStarted, setPlanStarted] = useState(false);
+
+  function PlanTour() {
+    console.log('Plan Tour button pressed');
+    console.log(planStarted);
+    setPlanStarted(true);
+  }
+
+  let display = planStarted ? <MapIntegratedScreen /> : <InitialScreen onPlanTour={PlanTour}/>;
+
+  return display;
+}
 
 export default function TourScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={<></>}
-      headerDisplay={false}  
+    <ThemedView
+      style={{
+        flex: 1,
+      }}
     >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Tour
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>Todos for this tab are listed below:</ThemedText>
-      <Collapsible title="Include some kind of maps API">
-        <ThemedText>
-          We need to connect the app to a maps service so that a map can be overlaid onto the app&apos;s UI. Many of the routing features will require this API.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Retrieve information">
-        <ThemedText>
-          - Should be able to search for a location
-        </ThemedText>
-        <ThemedText>
-          - Should be able to tap a location on the map UI and get things near the tap
-        </ThemedText>
-        <ThemedText>
-          - Relevant information should display for any location tapped on
-        </ThemedText>
-        <ThemedText>
-          - Should be able to interact with information, e.g. save the location, add it to lists, add it to a route, etc.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Create routes">
-        <ThemedText>
-          - Should have a create route button that sets up this process
-        </ThemedText>
-        <ThemedText>
-          - In this mode, the user should be able to select a start and end position, and the AI should create a route based on that (which will be displayed)
-        </ThemedText>
-        <ThemedText>
-          - The user should also be able to add intermediate positions on the tour that the AI will consider
-        </ThemedText>
-      </Collapsible>
-    </ParallaxScrollView>
+      <DynamicTour />
+    </ThemedView>
   );
 }
 
