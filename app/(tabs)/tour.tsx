@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Fonts } from '@/constants/theme';
 
-function InitialScreen({ onPlanTour }: { onPlanTour: () => void }) {
+function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
   return (
     <ThemedView
       style={{
@@ -22,7 +22,7 @@ function InitialScreen({ onPlanTour }: { onPlanTour: () => void }) {
         }}
       >
         <Pressable
-          onPress={onPlanTour}
+          onPress={onHandleState}
           style={{
             paddingHorizontal: 32,
             paddingVertical: 24,
@@ -39,7 +39,7 @@ function InitialScreen({ onPlanTour }: { onPlanTour: () => void }) {
   );
 }
 
-function MapIntegratedScreen() {
+function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
   return (
     <>
       <ThemedView
@@ -63,6 +63,26 @@ function MapIntegratedScreen() {
             }}>
             Tour
           </ThemedText>
+          <ThemedView
+            style={{
+              backgroundColor: 'purple',
+              borderRadius: 16,
+            }}
+          >
+            <Pressable
+              onPress={onHandleState}
+              style={{
+                paddingHorizontal: 32,
+                paddingVertical: 24,
+              }}
+            >
+              <ThemedText
+                style={{
+                  fontSize: 18
+                }}
+              >Exit</ThemedText>
+            </Pressable>
+          </ThemedView>
         </ThemedView>
       </ParallaxScrollView>
     </>
@@ -72,13 +92,16 @@ function MapIntegratedScreen() {
 function DynamicTour() {
   const [planStarted, setPlanStarted] = useState(false);
 
-  function PlanTour() {
+  function HandleState() {
     console.log('Plan Tour button pressed');
     console.log(planStarted);
-    setPlanStarted(true);
+    if (planStarted)
+      setPlanStarted(false);
+    else
+      setPlanStarted(true);
   }
 
-  let display = planStarted ? <MapIntegratedScreen /> : <InitialScreen onPlanTour={PlanTour}/>;
+  let display = planStarted ? <MapIntegratedScreen onHandleState={HandleState} /> : <InitialScreen onHandleState={HandleState} />;
 
   return display;
 }
