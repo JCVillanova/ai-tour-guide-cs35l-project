@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ThemedButton } from '@/components/ui/themed-button';
 import { Fonts } from '@/constants/theme';
 
 function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
@@ -15,26 +16,12 @@ function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
         alignItems: 'center',
       }}
     >
-      <ThemedView
-        style={{
-          backgroundColor: 'purple',
-          borderRadius: 16,
-        }}
-      >
-        <Pressable
-          onPress={onHandleState}
-          style={{
-            paddingHorizontal: 32,
-            paddingVertical: 24,
-          }}
-        >
-          <ThemedText
-            style={{
-              fontSize: 18
-            }}
-          >Plan Tour</ThemedText>
-        </Pressable>
-      </ThemedView>
+      <ThemedButton
+        onPress={onHandleState}
+        content='Plan Tour'
+        size='large'
+        style={{}}
+      />
     </ThemedView>
   );
 }
@@ -63,26 +50,12 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
             }}>
             Tour
           </ThemedText>
-          <ThemedView
-            style={{
-              backgroundColor: 'purple',
-              borderRadius: 16,
-            }}
-          >
-            <Pressable
-              onPress={onHandleState}
-              style={{
-                paddingHorizontal: 32,
-                paddingVertical: 24,
-              }}
-            >
-              <ThemedText
-                style={{
-                  fontSize: 18
-                }}
-              >Exit</ThemedText>
-            </Pressable>
-          </ThemedView>
+          <ThemedButton
+            onPress={onHandleState}
+            content='Exit'
+            size='medium'
+            style={{}}
+          />
         </ThemedView>
       </ParallaxScrollView>
     </>
