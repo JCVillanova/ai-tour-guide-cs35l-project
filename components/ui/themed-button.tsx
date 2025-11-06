@@ -27,7 +27,6 @@ export function ThemedButton({
   return (
     <ThemedView
       style={[
-        { backgroundColor: color },
         size === 'small' ? styles.smallView : undefined,
         size === 'medium' ? styles.mediumView : undefined,
         size === 'large' ? styles.largeView : undefined,
@@ -69,6 +68,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   mediumView: {
+    alignItems: 'center',
     borderRadius: 12,
   },
   mediumButton: {

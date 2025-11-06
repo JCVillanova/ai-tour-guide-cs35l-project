@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet } from 'react-native';
 
-import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedButton } from '@/components/ui/themed-button';
@@ -31,18 +30,24 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
     <>
       <ThemedView
         style={{
-          backgroundColor: 'purple',
+          backgroundColor: 'lightgreen',
           height: '50%',
         }}
+      ></ThemedView>
+      <ThemedView
+        style={{
+          flexDirection: 'column',
+          height: '50%',
+          justifyContent: 'space-between',
+          padding: 16,
+        }}
       >
-
-      </ThemedView>
-      <ParallaxScrollView
-        headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-        headerImage={<></>}
-        headerDisplay={false}
-      >
-        <ThemedView style={styles.titleContainer}>
+        <ThemedView
+          style={[
+            {flexGrow: 1},
+            styles.titleContainer
+          ]}
+        >
           <ThemedText
             type="title"
             style={{
@@ -50,14 +55,14 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
             }}>
             Tour
           </ThemedText>
-          <ThemedButton
-            onPress={onHandleState}
-            content='Exit'
-            size='medium'
-            style={{}}
-          />
         </ThemedView>
-      </ParallaxScrollView>
+        <ThemedButton
+          onPress={onHandleState}
+          content='Exit'
+          size='medium'
+          style={{}}
+        />
+      </ThemedView>
     </>
   );
 }
@@ -66,8 +71,6 @@ function DynamicTour() {
   const [planStarted, setPlanStarted] = useState(false);
 
   function HandleState() {
-    console.log('Plan Tour button pressed');
-    console.log(planStarted);
     if (planStarted)
       setPlanStarted(false);
     else
