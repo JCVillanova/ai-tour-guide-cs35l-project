@@ -27,6 +27,18 @@ function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
 }
 
 function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
+  const [searchText, setSearchText] = useState('');
+
+  function handleSearch(text: string) {
+    // Do something to display search results
+  }
+
+  function handleTextChange(text: string) {
+    setSearchText(text);
+    console.log('Changed search text to "' + text + '"');
+    handleSearch(text)
+  }
+
   return (
     <>
       <ThemedView
@@ -47,6 +59,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
           style={{
               flexDirection: 'column',
               flexGrow: 1,
+              gap: 16,
             }}
         >
           <ThemedText
@@ -57,8 +70,24 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
             Plan Tour
           </ThemedText>
           <ThemedTextInput
+            onChangeText={handleTextChange}
             placeholder='Search for a place anywhere'
           />
+          <ThemedView
+            style={{
+              borderColor: 'white',
+              borderRadius: 4,
+              borderWidth: 0.5,
+              height: 192,
+            }}
+          >
+            <ThemedText
+              type='default'
+              style={{
+                margin: 'auto',
+              }}
+            >SEARCH RESULTS GO HERE</ThemedText>
+          </ThemedView>
         </ThemedView>
         <ThemedButton
           onPress={onHandleState}

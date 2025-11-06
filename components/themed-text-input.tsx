@@ -7,6 +7,7 @@ export type ThemedTextInputProps = TextInputProps & {
   darkColor?: string;
   value?: string;
   placeholder?: string;
+  onChangeText?: (text: string) => void;
 };
 
 export function ThemedTextInput({
@@ -15,6 +16,7 @@ export function ThemedTextInput({
   darkColor,
   value,
   placeholder,
+  onChangeText,
   ...rest
 }: ThemedTextInputProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
@@ -33,6 +35,7 @@ export function ThemedTextInput({
       ]}
       value={value}
       placeholder={placeholder}
+      onChangeText={onChangeText}
       {...rest}
     />
   );
