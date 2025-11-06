@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { ThemedTextInput } from '@/components/themed-text-input';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedButton } from '@/components/ui/themed-button';
 import { Fonts } from '@/constants/theme';
@@ -43,18 +44,21 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
         }}
       >
         <ThemedView
-          style={[
-            {flexGrow: 1},
-            styles.titleContainer
-          ]}
+          style={{
+              flexDirection: 'column',
+              flexGrow: 1,
+            }}
         >
           <ThemedText
             type="title"
             style={{
               fontFamily: Fonts.rounded,
             }}>
-            Tour
+            Plan Tour
           </ThemedText>
+          <ThemedTextInput
+            placeholder='Search for a place anywhere'
+          />
         </ThemedView>
         <ThemedButton
           onPress={onHandleState}
