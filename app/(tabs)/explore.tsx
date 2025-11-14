@@ -90,9 +90,9 @@ export default function TourScreen() {
         </Collapsible>
         <Collapsible title="Retrieve information - connect to some LLM to generate information">
           <ThemedText>- Should be able to search for a location</ThemedText>
-          <ThemedText>- Should be able to tap a location on the map UI and get things near the tap</ThemedText>
-          <ThemedText>- Relevant information should display for any location tapped on</ThemedText>
-          <ThemedText>- Should be able to interact with information, e.g. save the location, add it to lists, add it to a route, etc.</ThemedText>
+          <ThemedText>- Should be able to generate information about said location</ThemedText>
+          <ThemedText>- Maybe highlight direction or point on map that is being talked about</ThemedText>
+          <ThemedText>- Show a circle on what is being scanned for being information-worthy (radius in which info is being searched up for)</ThemedText>
         </Collapsible>
       </ParallaxScrollView>
 
