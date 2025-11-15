@@ -19,13 +19,15 @@ const User = require("../models/User"); // Mongoose model
 
 router.put("/users", async (req: Request, res: Response) => {
   try {
-    const { email, encryptedPassword } = req.body;
+    const { email, password } = req.body;
 
-    if (!email || !encryptedPassword) {
+    if (!email || !password) {
       return res
         .status(400)
         .json({ message: "Email and encryptedPassword are required" });
     }
+    const bcrypt = require("bcryptjs"); //hash the password before storing
+    const encryptedPassword = await bcrypt.hash(password, 10);
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -38,6 +40,32 @@ router.put("/users", async (req: Request, res: Response) => {
     const userObj = newUser.toObject();
     delete userObj.password; // don't return password
     return res.status(201).json({ message: "User created", user: userObj });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return res.status(500).json({ message });
+  }
+});
+
+router.post("/users/authenticate", async (req: Request, res: Response) => {
+  //send over the encrypted version of the password entered - if it matches the curent stored encrypted password, authenticate
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and encryptedPassword are required" });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const bcrypt = require("bcryptjs");
+    const isMatch = await bcrypt.compare(password, user.password); //checks the hash of the attempted password against the stored hash
+    if (!isMatch) {
+      return res.status(401).json({ message: "Authentication failed" });
+    }
+
+    return res.status(200).json({ message: "Authentication successful" });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return res.status(500).json({ message });
