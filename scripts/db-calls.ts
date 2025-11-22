@@ -1,3 +1,5 @@
 async function handleLogin(email: string, password: string) {}
 
-export default handleLogin;
+async function createAccount(email: string, password: string) {}
+
+export { createAccount, handleLogin };

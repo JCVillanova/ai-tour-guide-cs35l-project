@@ -1,11 +1,12 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "expo-router";
 import { useState } from "react";
-import handleLogin from "../../scripts/db-calls";
+import { handleLogin } from "../../scripts/db-calls";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const handleLoginClick = async () => {
     try {
@@ -13,6 +14,11 @@ function LoginPage() {
     } catch (error) {
       console.error("Login failed:", error);
     }
+    AsyncStorage.setItem("userEmail", email);
+  };
+
+  const handlCreateAccountClick = () => {
+    navigation.navigate("/(tabs)/create-account");
   };
 
   let EnterLogonInfo = (
