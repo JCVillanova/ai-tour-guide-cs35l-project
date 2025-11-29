@@ -1,8 +1,15 @@
+import { run } from '@/scripts/geminiprompttest';
 import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
-import { run } from '@/scripts/geminiprompttest';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import MapView, { Circle, PROVIDER_GOOGLE } from 'react-native-maps';
 
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
@@ -11,6 +18,7 @@ import { Collapsible } from '@/components/ui/collapsible';
 import { Fonts } from '@/constants/theme';
 
 export default function TourScreen() {
+
   const [tourOn, setTourOn] = useState(false);
   const [infoBlocks, setInfoBlocks] = useState<string[]>([
     'Welcome to your AI tour! As Gemini sends new info, new blocks will appear below.',
@@ -49,14 +57,29 @@ export default function TourScreen() {
     };
   }, []);
 
+  const promptGemini = async () => {
+    let geminiPrompt = await run();
+    setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
+  };
+
+  // useEffect(() => {
+  //   const intervalId = setInterval(promptGemini, promptIntervalSec * 1000);
+  //   return () => {
+  //     clearInterval(intervalId);
+  //   };
+  // }, []);
+
   const startTour = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') return;
 
     setTourOn(true);
 
-    let geminiPrompt = await run();
-    setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
+
+    // let geminiPrompt = await run();
+    // setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
+
+
 
     watchRef.current = await Location.watchPositionAsync(
       {
@@ -103,18 +126,21 @@ export default function TourScreen() {
       return;
     }
 
-    promptTimerRef.current = setInterval(() => {
-      setInfoBlocks((prev) => [
-        ...prev,
-        `prompted after ${promptIntervalSec} seconds`,
-      ]);
-    }, promptIntervalSec * 1000);
+    // promptTimerRef.current = setInterval(() => {
+    //   setInfoBlocks((prev) => [
+    //     ...prev,
+    //     `prompted after ${promptIntervalSec} seconds`,
+    //   ]);
+    // }, promptIntervalSec * 1000);
+
+    const intervalId = setInterval(promptGemini, promptIntervalSec * 1000);
 
     return () => {
       if (promptTimerRef.current) {
         clearInterval(promptTimerRef.current);
         promptTimerRef.current = null;
       }
+      clearInterval(intervalId);
     };
   }, [tourOn, promptIntervalSec]);
 //input boxes

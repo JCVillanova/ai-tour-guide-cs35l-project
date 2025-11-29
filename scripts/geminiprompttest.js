@@ -8,7 +8,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 
 
-const apiKey = "DO NOT COMMIT THE API KEY";
+const apiKey = "AIzaSyDBgRD-tgD08tMf-P5qMXu9jkNXOkFT7Tc";
 console.log(apiKey);
 if (!apiKey) {
   console.error("GEMINI_KEY not found");
