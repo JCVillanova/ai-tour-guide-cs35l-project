@@ -2,6 +2,7 @@ import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import { run } from '@/scripts/geminiprompttest';
 
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
@@ -32,6 +33,9 @@ export default function TourScreen() {
     if (status !== 'granted') return;
 
     setTourOn(true);
+
+    let geminiPrompt = await run();
+    setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
 
     watchRef.current = await Location.watchPositionAsync(
       {
