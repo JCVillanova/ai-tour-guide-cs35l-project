@@ -1,3 +1,7 @@
+import { ThemedText } from "@/components/themed-text";
+import { ThemedTextInput } from "@/components/themed-text-input";
+import { ThemedView } from "@/components/themed-view";
+import { ThemedButton } from "@/components/ui/themed-button";
 import { useNavigation } from "expo-router";
 import { useState } from "react";
 import { createAccount } from "../../scripts/db-calls";
@@ -20,24 +24,26 @@ function CreateAccountPage() {
   }
 
   return (
-    <div>
-      <h1>Create Account</h1>
-      <input
-        type="email"
+    <ThemedView>
+      <ThemedText type="title">Create Account</ThemedText>
+      <ThemedTextInput
         placeholder="Email"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        onChangeText={(text) => setEmail(text)}
       />
-      <input
-        type="password"
+      <ThemedTextInput
+        secureTextEntry={true}
         placeholder="Password"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        onChangeText={(text) => setPassword(text)}
       />
-      <button onClick={() => createAccountClick()}>Create Account</button>
+      <ThemedButton
+        onPress={() => createAccountClick()}
+        content="Create Account"
+      ></ThemedButton>
 
-      <button onClick={GoToLogin}>Back to Login</button>
-    </div>
+      <ThemedButton onPress={GoToLogin} content="Back to Login"></ThemedButton>
+    </ThemedView>
   );
 }
 

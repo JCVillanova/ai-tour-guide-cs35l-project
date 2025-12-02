@@ -1,6 +1,12 @@
+import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Collapsible } from '@/components/ui/collapsible';
+import { Fonts } from '@/constants/theme';
 import { run } from '@/scripts/geminiprompttest';
 import { GetPlacesInRadius } from '@/scripts/google-maps-util';
 import * as Location from 'expo-location';
+import * as Speech from 'expo-speech';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Pressable,
@@ -12,17 +18,10 @@ import {
 } from 'react-native';
 import MapView, { Circle, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { Fonts } from '@/constants/theme';
-
 export default function TourScreen() {
 
   const [tourOn, setTourOn] = useState(false);
   const [infoBlocks, setInfoBlocks] = useState<string[]>([
-    'Welcome to your AI tour! As Gemini sends new info, new blocks will appear below.',
   ]);
 
   // current gps coords
@@ -127,12 +126,14 @@ export default function TourScreen() {
   const endTour = () => {
     watchRef.current?.remove();
     watchRef.current = null;
+    setInfoBlocks([]);
     setTourOn(false);
-
+    Speech.stop();
     if (promptTimerRef.current) {
       clearInterval(promptTimerRef.current);
       promptTimerRef.current = null;
     }
+    
   };
 
   useEffect(() => {
@@ -151,22 +152,35 @@ export default function TourScreen() {
     //     `prompted after ${promptIntervalSec} seconds`,
     //   ]);
     // }, promptIntervalSec * 1000);
+    const intervalGemini = setInterval(promptGemini, promptIntervalSec * 1000);
 
-    const intervalId = setInterval(promptGemini, promptIntervalSec * 1000);
+    
 
     return () => {
       if (promptTimerRef.current) {
         clearInterval(promptTimerRef.current);
         promptTimerRef.current = null;
       }
-      clearInterval(intervalId);
+      clearInterval(intervalGemini);
     };
   }, [tourOn, promptIntervalSec]);
+
+//text to speech
+useEffect(() => {
+  if (infoBlocks.length === 0) return;
+
+  const latest = infoBlocks[infoBlocks.length - 1];
+  Speech.speak(latest);
+  return () =>{
+      Speech.stop();
+  };
+}, [infoBlocks, tourOn]);
+
 //input boxes
   const handleRangeChange = (text: string) => {
     setRangeInput(text);
     const value = parseFloat(text);
-    if (!isNaN(value) && value >= 0) {
+    if (!isNaN(value) && value >= 10) {
       setRangeMeters(value);
     }
   };
@@ -174,7 +188,7 @@ export default function TourScreen() {
   const handlePromptIntervalChange = (text: string) => {
     setPromptIntervalInput(text);
     const value = parseFloat(text);
-    if (!isNaN(value) && value > 0) {
+    if (!isNaN(value) && value >= 5) {
       setPromptIntervalSec(value);
     }
   };

@@ -1,3 +1,7 @@
+import { ThemedText } from "@/components/themed-text";
+import { ThemedTextInput } from "@/components/themed-text-input";
+import { ThemedView } from "@/components/themed-view";
+import { ThemedButton } from "@/components/ui/themed-button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "expo-router";
 import { useState } from "react";
@@ -17,38 +21,28 @@ function LoginPage() {
     AsyncStorage.setItem("userEmail", email);
   };
 
-  const handlCreateAccountClick = () => {
+  const handleCreateAccountClick = () => {
     navigation.navigate("/(tabs)/create-account");
   };
 
   let EnterLogonInfo = (
-    <div>
-      <h1>Login</h1>
-      <input
-        type="email"
+    <ThemedView>
+      <ThemedText type="title">Login</ThemedText>
+      <ThemedTextInput
         placeholder="Email"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        onChangeText={(text) => setEmail(text)}
       />
-      <input
-        type="password"
+      <ThemedTextInput
+        secureTextEntry={true}
         placeholder="Password"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        onChangeText={(text) => setPassword(text)}
       />
-      <button onClick={handleLoginClick}>Login</button>
+      <ThemedButton onPress={handleLoginClick} content="Login"></ThemedButton>
 
-      <button>Sign Up</button>
-    </div>
-  );
-
-  let CreateAccount = (
-    <div>
-      <h1>Create Account</h1>
-      <input type="email" placeholder="Email" />
-      <input type="password" placeholder="Password" />
-      <button>Create Account</button>
-    </div>
+      <ThemedButton content="Sign Up"></ThemedButton>
+    </ThemedView>
   );
 
   return <>{EnterLogonInfo}</>;
