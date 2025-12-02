@@ -2,17 +2,17 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedTextInput } from "@/components/themed-text-input";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedButton } from "@/components/ui/themed-button";
-import { useNavigation } from "expo-router";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { createAccount } from "../../scripts/db-calls";
 
 function CreateAccountPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigation = useNavigation();
+  const router = useRouter();
 
   function GoToLogin() {
-    // navigation.back();
+    router.back();
   }
 
   function createAccountClick() {
@@ -42,7 +42,7 @@ function CreateAccountPage() {
         content="Create Account"
       ></ThemedButton>
 
-      <ThemedButton onPress={GoToLogin} content="Back to Login"></ThemedButton>
+      <ThemedButton content="Back to Login" onPress={GoToLogin}></ThemedButton>
     </ThemedView>
   );
 }

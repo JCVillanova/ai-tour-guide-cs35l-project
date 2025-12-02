@@ -3,14 +3,14 @@ import { ThemedTextInput } from "@/components/themed-text-input";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedButton } from "@/components/ui/themed-button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "expo-router";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { handleLogin } from "../../scripts/db-calls";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigation = useNavigation<any>();
+  const router = useRouter();
 
   const handleLoginClick = async () => {
     try {
@@ -22,7 +22,7 @@ function LoginPage() {
   };
 
   const handleCreateAccountClick = () => {
-    navigation.navigate("/(tabs)/create-account");
+    router.push("/(tabs)/create-account");
   };
 
   let EnterLogonInfo = (
@@ -41,7 +41,10 @@ function LoginPage() {
       />
       <ThemedButton onPress={handleLoginClick} content="Login"></ThemedButton>
 
-      <ThemedButton content="Sign Up"></ThemedButton>
+      <ThemedButton
+        content="Sign Up"
+        onPress={handleCreateAccountClick}
+      ></ThemedButton>
     </ThemedView>
   );
 
