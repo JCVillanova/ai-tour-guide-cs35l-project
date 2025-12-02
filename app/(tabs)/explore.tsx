@@ -4,6 +4,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Collapsible } from '@/components/ui/collapsible';
 import { Fonts } from '@/constants/theme';
 import { run } from '@/scripts/geminiprompttest';
+import { GetPlacesInRadius } from '@/scripts/google-maps-util';
 import * as Location from 'expo-location';
 import * as Speech from 'expo-speech';
 import React, { useEffect, useRef, useState } from 'react';
@@ -57,8 +58,26 @@ export default function TourScreen() {
   }, []);
 
   const promptGemini = async () => {
-    let geminiPrompt = await run();
-    setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
+    if (currentCoords) {
+      // Await the places search so we pass meaningful text to the Gemini prompt
+      const places = await GetPlacesInRadius(currentCoords.latitude, currentCoords.longitude, rangeMeters, "AIzaSyCeVPoJrwSedLMPpMtiCfP7bagnRRwtD18");
+
+      // Convert results to readable text (name / vicinity / formatted_address)
+      let placesText: string;
+      if (Array.isArray(places) && places.length > 0) {
+        placesText = places
+          .map((p: any, i: number) => {
+            const name = p.name || p.vicinity || p.formatted_address;
+            return `${i + 1}. ${name ?? JSON.stringify(p)}`;
+          })
+          .join('\n');
+      } else {
+        placesText = 'No nearby places found.';
+      }
+
+      const geminiPrompt = await run(placesText);
+      setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
+    }
   };
 
   // useEffect(() => {
@@ -181,6 +200,7 @@ useEffect(() => {
           headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
           headerImage={<></>}
           headerDisplay={false}
+          style={{}}
         >
           <ThemedView style={styles.titleContainer}>
             <ThemedText type="title" style={{ fontFamily: Fonts.rounded }}>
@@ -222,7 +242,7 @@ useEffect(() => {
           {}
           <View style={styles.mapContainer}>
             <MapView
-              ref={(r) => (mapRef.current = r)}
+              ref={(r) => {mapRef.current = r}}
               provider={PROVIDER_GOOGLE}
               style={StyleSheet.absoluteFill}
               mapType="standard"

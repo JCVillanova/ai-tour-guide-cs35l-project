@@ -23,15 +23,8 @@ const genAI = new GoogleGenerativeAI(apiKey);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 
-export async function run() {
-  const result = await model.generateContent("Write somethinhg silly");
+export async function run(places: any) {
+  const result = await model.generateContent(places + "\n\nGive a summary of the places given above in list format.");
   console.log("Gemini says:\n", result.response.text());
   return result.response.text();
-
-
 }
-
-
-run();
-
-
