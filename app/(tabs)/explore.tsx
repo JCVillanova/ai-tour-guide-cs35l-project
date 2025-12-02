@@ -1,9 +1,9 @@
-import { run } from '@/scripts/geminiprompttest';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Collapsible } from '@/components/ui/collapsible';
 import { Fonts } from '@/constants/theme';
+import { run } from '@/scripts/geminiprompttest';
 import * as Location from 'expo-location';
 import * as Speech from 'expo-speech';
 import React, { useEffect, useRef, useState } from 'react';
@@ -110,7 +110,7 @@ export default function TourScreen() {
     watchRef.current = null;
     setInfoBlocks([]);
     setTourOn(false);
-
+    Speech.stop;
     if (promptTimerRef.current) {
       clearInterval(promptTimerRef.current);
       promptTimerRef.current = null;
