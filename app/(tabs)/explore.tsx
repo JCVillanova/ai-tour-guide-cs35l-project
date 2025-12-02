@@ -1,5 +1,5 @@
 import { run } from '@/scripts/geminiprompttest';
-import { GetPlacesInRadius } from '@/scripts/get-places-in-radius';
+import { GetPlacesInRadius } from '@/scripts/google-maps-util';
 import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
 import {
