@@ -1,5 +1,3 @@
-
-
 /**
  * React Native / browser-friendly Places Nearby Search using fetch.
  * Use this in the client (Expo/React Native). For production hide the API key
@@ -7,12 +5,12 @@
  */
 type PlaceResult = any;
 
-let map: google.maps.Map | null = null;
+let map: google.maps.Map;
 let markers = {};
 let infoWindow;
 
 async function initMap() {
-    const { Map, InfoWindow } = await google.maps.importLibrary("maps") as google.maps.MapsLibrary;
+  const { Map, InfoWindow } = await (google as any).maps.importLibrary("maps") as google.maps.MapsLibrary;
 
     const center = { lat: 37.4161493, lng: -122.0812166 };
     map = new Map(document.getElementById('map') as HTMLElement, {
@@ -25,7 +23,7 @@ async function initMap() {
     const textInput = document.getElementById('text-input') as HTMLInputElement;
     const textInputButton = document.getElementById('text-input-button') as HTMLButtonElement;
     const card = document.getElementById('text-input-card') as HTMLElement;
-    map.controls[google.maps.ControlPosition.TOP_LEFT].push(card);
+    map.controls[(google as any).maps.ControlPosition.TOP_LEFT].push(card);
 
     textInputButton.addEventListener('click', () => {
         SearchWithText(textInput.value);
@@ -37,40 +35,61 @@ async function initMap() {
         }
     });
 
-    infoWindow = new google.maps.InfoWindow();
+    infoWindow = new (google as any).maps.InfoWindow();
 }
 
 export async function SearchWithText(query: string) {
-  if (!map) throw new Error('Map is not initialized');
+  // If running in a browser with the Maps JS API and map is initialized, use the client-side PlacesService.
+  if (typeof google !== 'undefined' && (google as any).maps && map) {
+    const placesService: any = (google as any).maps.places ? new (google as any).maps.places.PlacesService(map) : null;
+    if (placesService) {
+      const request: any = {
+        query,
+        fields: ['name', 'geometry', 'business_status', 'formatted_address', 'vicinity'],
+        locationBias: map.getCenter(),
+      };
 
-  // Use the client-side PlacesService instead of the non-existent `Place` object.
-  const placesService: any = (google.maps.places as any)
-    ? new (google.maps.places as any).PlacesService(map)
-    : null;
+      const results: any[] = await new Promise((resolve) => {
+        placesService.findPlaceFromQuery(request, (res: any, status: any) => {
+          if (status === (google as any).maps.places.PlacesServiceStatus.OK) {
+            resolve(res || []);
+          } else {
+            resolve([]);
+          }
+        });
+      });
 
-  if (!placesService) {
-    // If the Places library isn't loaded, return an empty array rather than throwing.
-    return [];
+      return results;
+    }
   }
 
-  const request: any = {
-    query,
-    fields: ['name', 'geometry', 'business_status'],
-    locationBias: map.getCenter(),
-  };
+  // Fallback: use Places Text Search REST API (works in React Native)
+  const apiKey = "AIzaSyBPrqOHzkkW6mZOOjeiId-krDVF0lygy1A";
+  if (!apiKey) throw new Error('Missing GOOGLE_MAPS_API_KEY for REST fallback');
 
-  const results: any[] = await new Promise((resolve) => {
-    placesService.findPlaceFromQuery(request, (res: any, status: any) => {
-      // Resolve with results or an empty array on non-OK status.
-      if (status === (google.maps.places as any).PlacesServiceStatus.OK) {
-        resolve(res || []);
-      } else {
-        resolve([]);
+  const base = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
+  const params = new URLSearchParams({ key: apiKey, query });
+  try {
+    if (map && typeof map.getCenter === 'function') {
+      const c: any = map.getCenter();
+      if (c && typeof c.lat === 'function') {
+        params.set('location', `${c.lat()},${c.lng()}`);
+      } else if (c && c.lat != null) {
+        params.set('location', `${c.lat},${c.lng}`);
       }
-    });
-  });
+    }
+  } catch (e) {
+    // ignore
+  }
 
-  return results;
+  const url = `${base}?${params.toString()}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Places TextSearch HTTP error: ${res.status}`);
+  const data = await res.json();
+  if (data.status && data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+    throw new Error(`Places TextSearch error: ${data.status} ${data.error_message || ''}`);
+  }
+  return data.results || [];
 }
 
 export async function GetPlacesInRadius(lat: number, lng: number, radius: number, apiKey?: string): Promise<PlaceResult[]> {
@@ -121,7 +140,12 @@ export async function GetPlacesInRadius(lat: number, lng: number, radius: number
   return results;
 }
 
-initMap();
+// Only initialize the web map when running in a browser environment with the Maps JS API loaded.
+if (typeof window !== 'undefined' && typeof document !== 'undefined' && typeof google !== 'undefined' && (google as any).maps && (google as any).maps.importLibrary) {
+  initMap().catch((err) => console.error('initMap failed:', err));
+} else {
+  console.warn('Google Maps JS API not available in this runtime; skipping initMap (likely running in React Native).');
+}
 
 /*******************************************
 EXTENSIVE LLM PROMPTING USED IN THIS FILE:

@@ -7,6 +7,7 @@ import { ThemedView } from '@/components/themed-view';
 import { ThemedButton } from '@/components/ui/themed-button';
 import { Fonts } from '@/constants/theme';
 
+import { SearchWithText } from '@/scripts/google-maps-util';
 import * as Location from 'expo-location';
 import MapView, { Circle, PROVIDER_GOOGLE } from 'react-native-maps';
 
@@ -31,6 +32,7 @@ function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
 
 function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
   const [searchText, setSearchText] = useState('');
+  const [searchResults, setSearchResults] = useState('');
 
   const [tourOn, setTourOn] = useState(false);
 
@@ -87,6 +89,21 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
 
   function handleSearch(text: string) {
     // Do something to display search results
+    let resultsText: string;
+    let results = SearchWithText(text);
+
+    if (Array.isArray(results) && results.length > 0) {
+      resultsText = results
+        .map((p: any, i: number) => {
+          const name = p.name || p.vicinity || p.formatted_address;
+          return `${i + 1}. ${name ?? JSON.stringify(p)}`;
+        })
+        .join('\n');
+    } else {
+      resultsText = 'No results found.';
+    }
+
+    setSearchResults(resultsText);
   }
 
   function handleTextChange(text: string) {
@@ -168,7 +185,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
               style={{
                 margin: 'auto',
               }}
-            >SEARCH RESULTS GO HERE</ThemedText>
+            >{searchResults}</ThemedText>
           </ThemedView>
         </ThemedView>
         <ThemedButton
