@@ -20,7 +20,7 @@ async function createAccount(email: string, password: string) {
   return response.json();
 }
 
-async function getLocationInfo(
+async function getLocationInfoCoords(
   latitude: number,
   longitude: number
 ): Promise<string> {
@@ -36,6 +36,35 @@ async function getLocationInfo(
 
   const data = await response.text();
   return data;
+}
+
+async function getLocationInfoByName(locationName: string): Promise<string> {
+  const response = await fetch(
+    "https://your-backend-api.com/location-info?name=${locationName}",
+    { method: "GET" }
+  );
+  if (!response.ok) {
+    console.error("Failed to fetch location info");
+    return "";
+  }
+  const data = await response.text();
+  return data;
+}
+
+async function getlocationsNearby(
+  latitude: number,
+  longitude: number
+): Promise<string[]> {
+  const response = await fetch(
+    "https://your-backend-api.com/locations-nearby",
+    { method: "GET" }
+  );
+  if (!response.ok) {
+    console.error("Failed to fetch nearby locations");
+    return [];
+  }
+  const data = await response.json();
+  return data.locations;
 }
 
 async function logUserActivity(
@@ -67,4 +96,12 @@ async function getUserHistory(email: string): Promise<string[]> {
   return data.history;
 }
 
-export { createAccount, handleLogin };
+export {
+  createAccount,
+  getLocationInfoByName,
+  getLocationInfoCoords,
+  getlocationsNearby,
+  getUserHistory,
+  handleLogin,
+  logUserActivity,
+};

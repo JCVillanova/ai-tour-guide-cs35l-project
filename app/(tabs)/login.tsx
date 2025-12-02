@@ -5,7 +5,7 @@ import { ThemedButton } from "@/components/ui/themed-button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { handleLogin } from "../../scripts/db-calls";
+import { handleLogin } from "../../scripts/backend-call";
 
 function LoginPage() {
   const [email, setEmail] = useState("");

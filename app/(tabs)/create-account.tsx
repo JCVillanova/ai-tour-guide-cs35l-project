@@ -4,7 +4,7 @@ import { ThemedView } from "@/components/themed-view";
 import { ThemedButton } from "@/components/ui/themed-button";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { createAccount } from "../../scripts/db-calls";
+import { createAccount } from "../../scripts/backend-call";
 
 function CreateAccountPage() {
   const [email, setEmail] = useState("");
