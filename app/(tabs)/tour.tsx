@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react';
-import { FlatList, Pressable, StyleSheet } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedTextInput } from '@/components/themed-text-input';
@@ -151,11 +151,16 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
   }
 
   return (
-    <>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{
+        flex: 1,
+      }}
+    >
       <ThemedView
         style={styles.mapContainer && {
-          backgroundColor: 'lightgreen',
-          height: '50%',
+          flex: 1,
+          flexShrink: 1,
         }}
       >
             <MapView
@@ -187,8 +192,8 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
       <ThemedView
         style={{
           flexDirection: 'column',
-          height: '50%',
           justifyContent: 'space-between',
+          minHeight: 400,
           padding: 16,
         }}
       >
@@ -225,15 +230,15 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
               }}
             >{searchResults}</ThemedText>
           </ThemedView>
+          <ThemedButton
+            onPress={onHandleState}
+            content='Exit'
+            size='medium'
+            style={{}}
+          />
         </ThemedView>
-        <ThemedButton
-          onPress={onHandleState}
-          content='Exit'
-          size='medium'
-          style={{}}
-        />
       </ThemedView>
-    </>
+    </KeyboardAvoidingView>
   );
 }
 
