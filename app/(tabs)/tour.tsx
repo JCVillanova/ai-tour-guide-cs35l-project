@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { useRef, useState, type ReactNode } from 'react';
+import { FlatList, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedTextInput } from '@/components/themed-text-input';
@@ -7,7 +7,6 @@ import { ThemedView } from '@/components/themed-view';
 import { ThemedButton } from '@/components/ui/themed-button';
 import { Fonts } from '@/constants/theme';
 
-import { SearchWithText } from '@/scripts/google-maps-util';
 import * as Location from 'expo-location';
 import MapView, { Circle, PROVIDER_GOOGLE } from 'react-native-maps';
 
@@ -32,7 +31,7 @@ function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
 
 function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
   const [searchText, setSearchText] = useState('');
-  const [searchResults, setSearchResults] = useState('');
+  const [searchResults, setSearchResults] = useState<ReactNode | null>(null);
 
   const [tourOn, setTourOn] = useState(false);
 
@@ -88,22 +87,37 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
     };
 
   function handleSearch(text: string) {
-    // Do something to display search results
-    let resultsText: string;
-    let results = SearchWithText(text);
+    /*
+    TODO: IMPLEMENT SEARCH FUNCTIONALITY
+    Map is a string to number key-value system. The number should be changed to whatever data type actually accesses the queried location (that way a user
+    can tap the search result showing the string key and the app can then access the actual place)
+    */
+    let results = new Map<string, number>();
+    // Temp values
+    results.set("The Eiffel Tower", 0);
+    results.set("Machu Picchu", 1);
+    results.set("Your mom", 2);
 
-    if (Array.isArray(results) && results.length > 0) {
-      resultsText = results
-        .map((p: any, i: number) => {
-          const name = p.name || p.vicinity || p.formatted_address;
-          return `${i + 1}. ${name ?? JSON.stringify(p)}`;
-        })
-        .join('\n');
+    // TODO: POPULATE results WITH SEARCH RESULTS FROM MAPS API
+    const resultsArray: string[] = [...results.keys()];
+    let resultsDisplay: ReactNode | null = null;
+
+    const renderSearchResult = ({ item }: { item: string }) => (
+      <ThemedText>{item}</ThemedText>
+    );
+
+    if (results.size > 0) {
+      resultsDisplay = (
+          <FlatList
+            data={resultsArray}
+            renderItem={renderSearchResult}
+          />
+      );
     } else {
-      resultsText = 'No results found.';
+      results.set("No results found", 0);
     }
 
-    setSearchResults(resultsText);
+    setSearchResults(resultsDisplay);
   }
 
   function handleTextChange(text: string) {
