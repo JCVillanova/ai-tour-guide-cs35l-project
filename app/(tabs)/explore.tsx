@@ -20,9 +20,7 @@ import MapView, { Circle, PROVIDER_GOOGLE } from 'react-native-maps';
 export default function TourScreen() {
 
   const [tourOn, setTourOn] = useState(false);
-  const [infoBlocks, setInfoBlocks] = useState<string[]>([
-    'Welcome to your AI tour! As Gemini sends new info, new blocks will appear below.',
-  ]);
+  const [infoBlocks, setInfoBlocks] = useState<string[]>([]);
 
   // current gps coords
   const [currentCoords, setCurrentCoords] = useState<{
@@ -110,7 +108,7 @@ export default function TourScreen() {
     watchRef.current = null;
     setInfoBlocks([]);
     setTourOn(false);
-    Speech.pause;
+    Speech.stop();
     if (promptTimerRef.current) {
       clearInterval(promptTimerRef.current);
       promptTimerRef.current = null;
@@ -151,9 +149,6 @@ useEffect(() => {
 
   const latest = infoBlocks[infoBlocks.length - 1];
   Speech.speak(latest);
-  return () =>{
-      Speech.pause;
-  };
 }, [infoBlocks]);
 
 //input boxes
