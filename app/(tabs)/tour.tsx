@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList, Pressable, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedTextInput } from '@/components/themed-text-input';
@@ -94,26 +94,50 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
     */
     let results = new Map<string, number>();
     // Temp values
-    results.set("The Eiffel Tower", 0);
-    results.set("Machu Picchu", 1);
+    results.set("The Eiffel Tower, France", 0);
+    results.set("Machu Picchu, Peru", 1);
     results.set("Your mom", 2);
+    results.set("Westwood, CA, USA", 3);
+    results.set("Boston, MA, USA", 4);
+    results.set("Madrid, Spain", 5);
+    results.set("John Wooden Center", 6);
+    results.set("Krishna", 7);
+    results.set("Krishna Again", 8);
 
     // TODO: POPULATE results WITH SEARCH RESULTS FROM MAPS API
     const resultsArray: string[] = [...results.keys()];
     let resultsDisplay: ReactNode | null = null;
 
+    function SelectSearchResult(key: string) {
+      // TODO: Use the key passed in to access the value in the results map (will get all information about the location ideally)
+      console.log("Selected a search result: " + key);
+    }
+
+    // Each search result is a button that will call SelectSearchResult
     const renderSearchResult = ({ item }: { item: string }) => (
-      <ThemedText>{item}</ThemedText>
+      <Pressable
+        style={({ pressed }) => [
+          {
+            backgroundColor: pressed ? 'gray' : 'transparent'
+          }
+        ]}
+        onPress={() => SelectSearchResult(item)}
+      >
+        <ThemedText style={styles.searchResultText}>{item}</ThemedText>
+        <ThemedView style={styles.horizontalDivider}></ThemedView>
+      </Pressable>
     );
 
+    // Render a list if there are search results
     if (results.size > 0) {
       resultsDisplay = (
           <FlatList
             data={resultsArray}
             renderItem={renderSearchResult}
+            style={styles.searchResults}
           />
       );
-    } else {
+    } else { // If there are no search results
       results.set("No results found", 0);
     }
 
@@ -247,9 +271,21 @@ const styles = StyleSheet.create({
     left: -35,
     position: 'absolute',
   },
+  horizontalDivider: {
+    borderColor: 'white',
+    borderWidth: 0.5,
+    height: 0,
+  },
   mapContainer: {
     flex: 1,
     position: 'relative',
+  },
+  searchResults: {
+    height: '100%',
+    width: '100%',
+  },
+  searchResultText: {
+    padding: 16,
   },
   titleContainer: {
     flexDirection: 'row',
