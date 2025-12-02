@@ -110,7 +110,7 @@ export default function TourScreen() {
     watchRef.current = null;
     setInfoBlocks([]);
     setTourOn(false);
-    Speech.stop;
+    Speech.pause;
     if (promptTimerRef.current) {
       clearInterval(promptTimerRef.current);
       promptTimerRef.current = null;
@@ -151,6 +151,9 @@ useEffect(() => {
 
   const latest = infoBlocks[infoBlocks.length - 1];
   Speech.speak(latest);
+  return () =>{
+      Speech.pause;
+  };
 }, [infoBlocks]);
 
 //input boxes
