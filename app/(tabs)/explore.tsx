@@ -21,7 +21,6 @@ export default function TourScreen() {
 
   const [tourOn, setTourOn] = useState(false);
   const [infoBlocks, setInfoBlocks] = useState<string[]>([
-    'Welcome to your AI tour! As Gemini sends new info, new blocks will appear below.',
   ]);
 
   // current gps coords
@@ -110,11 +109,12 @@ export default function TourScreen() {
     watchRef.current = null;
     setInfoBlocks([]);
     setTourOn(false);
-    Speech.pause;
+    Speech.stop();
     if (promptTimerRef.current) {
       clearInterval(promptTimerRef.current);
       promptTimerRef.current = null;
     }
+    
   };
 
   useEffect(() => {
@@ -133,15 +133,16 @@ export default function TourScreen() {
     //     `prompted after ${promptIntervalSec} seconds`,
     //   ]);
     // }, promptIntervalSec * 1000);
+    const intervalGemini = setInterval(promptGemini, promptIntervalSec * 1000);
 
-    const intervalId = setInterval(promptGemini, promptIntervalSec * 1000);
+    
 
     return () => {
       if (promptTimerRef.current) {
         clearInterval(promptTimerRef.current);
         promptTimerRef.current = null;
       }
-      clearInterval(intervalId);
+      clearInterval(intervalGemini);
     };
   }, [tourOn, promptIntervalSec]);
 
@@ -152,9 +153,9 @@ useEffect(() => {
   const latest = infoBlocks[infoBlocks.length - 1];
   Speech.speak(latest);
   return () =>{
-      Speech.pause;
+      Speech.stop();
   };
-}, [infoBlocks]);
+}, [infoBlocks, tourOn]);
 
 //input boxes
   const handleRangeChange = (text: string) => {

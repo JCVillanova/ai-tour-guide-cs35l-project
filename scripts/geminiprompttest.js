@@ -5,7 +5,10 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 //dotenv.config({ path: findConfig('.env') });
 //import { GEMINI_KEY } from '@env';
 
-const apiKey = "";
+
+
+
+const apiKey = "DO NOT PUSH THIS";
 console.log(apiKey);
 if (!apiKey) {
   console.error("GEMINI_KEY not found");
