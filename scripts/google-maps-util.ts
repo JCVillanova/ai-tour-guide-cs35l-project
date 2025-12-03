@@ -3,6 +3,9 @@
  * Use this in the client (Expo/React Native). For production hide the API key
  * behind a server proxy — do NOT embed unrestricted keys in app builds.
  */
+
+import { GOOGLE_MAPS_API_KEY } from "@env";
+
 type PlaceResult = any;
 
 let map: google.maps.Map;
@@ -64,7 +67,7 @@ export async function SearchWithText(query: string) {
   }
 
   // Fallback: use Places Text Search REST API (works in React Native)
-  const apiKey = "AIzaSyBPrqOHzkkW6mZOOjeiId-krDVF0lygy1A";
+  const apiKey = GOOGLE_MAPS_API_KEY;
   if (!apiKey) throw new Error('Missing GOOGLE_MAPS_API_KEY for REST fallback');
 
   const base = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
@@ -92,8 +95,8 @@ export async function SearchWithText(query: string) {
   return data.results || [];
 }
 
-export async function GetPlacesInRadius(lat: number, lng: number, radius: number, apiKey?: string): Promise<PlaceResult[]> {
-  const key = apiKey || process.env.GOOGLE_MAPS_API_KEY;
+export async function GetPlacesInRadius(lat: number, lng: number, radius: number): Promise<PlaceResult[]> {
+  const key = GOOGLE_MAPS_API_KEY;
   if (!key) throw new Error('Missing Google Maps API key (pass as 4th arg or set GOOGLE_MAPS_API_KEY)');
 
   const base = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';

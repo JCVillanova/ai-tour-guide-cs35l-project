@@ -10,6 +10,7 @@ import { Fonts } from '@/constants/theme';
 import polyline from '@mapbox/polyline';
 import * as Location from 'expo-location';
 import MapView, { Circle, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import { GOOGLE_MAPS_API_KEY } from '@env';
 
 function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
   return (
@@ -49,7 +50,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
 
   const getDirections = async (startLoc: string, destinationLoc: string) => {
     try {
-      const KEY = "silly api key but this time i'm not pushing it because im not a raging lunatic";
+      const KEY = GOOGLE_MAPS_API_KEY;
       // Fetch the route from Google
       const response = await fetch(
         'https://routes.googleapis.com/directions/v2:computeRoutes',
