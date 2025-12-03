@@ -3,7 +3,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Collapsible } from '@/components/ui/collapsible';
 import { Fonts } from '@/constants/theme';
-import { clearSites, run } from '@/scripts/geminiprompttest';
+import { clearSites, run, warmGemini } from '@/scripts/geminiprompttest';
 import { GetPlacesInRadius } from '@/scripts/google-maps-util';
 import * as Location from 'expo-location';
 import * as Speech from 'expo-speech';
@@ -23,7 +23,7 @@ export default function TourScreen() {
   const [tourOn, setTourOn] = useState(false);
   const [infoBlocks, setInfoBlocks] = useState<string[]>([
   ]);
-
+  warmGemini();
   // current gps coords
   const [currentCoords, setCurrentCoords] = useState<{
     latitude: number;

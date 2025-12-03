@@ -21,6 +21,9 @@ const usedSites = new Set<string>();
 export function clearSites(){
   usedSites.clear();
 }
+export async function warmGemini(){
+  const warm = await model.generateContent("send me only the word hello");
+}
 export async function run(places: any) {
   // Turn our usedSites into a readable list for the prompt
   const usedSitesList = Array.from(usedSites);
@@ -28,7 +31,7 @@ export async function run(places: any) {
     usedSitesList.length > 0
       ? usedSitesList.join(', ')
       : 'none yet';
-
+  console.log("used sites: " + usedSitesText);
   const prompt = `
 You are generating narration for a walking tour.
 
@@ -79,6 +82,7 @@ ${places}
   if (placeName && !usedSites.has(placeName)) {
     usedSites.add(placeName);
   }
+  console.log("place name: " + placeName);
 
   // What the UI / TTS actually gets
   const finalText = blurb
