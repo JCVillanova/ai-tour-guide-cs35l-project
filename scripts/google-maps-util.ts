@@ -6,95 +6,85 @@
 
 import { GOOGLE_MAPS_API_KEY } from "@env";
 
-type PlaceResult = any;
+export type PlaceResult = {
+  displayName?: string;
+  formattedAddress?: {
+    text?: string;
+    languageCode?: string;
+  }
+};
 
 let map: google.maps.Map;
 let markers = {};
 let infoWindow;
 
-async function initMap() {
-  const { Map, InfoWindow } = await (google as any).maps.importLibrary("maps") as google.maps.MapsLibrary;
-
-    const center = { lat: 37.4161493, lng: -122.0812166 };
-    map = new Map(document.getElementById('map') as HTMLElement, {
-        center: center,
-        zoom: 11,
-        mapTypeControl: false,
-        mapId: 'DEMO_MAP_ID',
-    });
-
-    const textInput = document.getElementById('text-input') as HTMLInputElement;
-    const textInputButton = document.getElementById('text-input-button') as HTMLButtonElement;
-    const card = document.getElementById('text-input-card') as HTMLElement;
-    map.controls[(google as any).maps.ControlPosition.TOP_LEFT].push(card);
-
-    textInputButton.addEventListener('click', () => {
-        SearchWithText(textInput.value);
-    });
-
-    textInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            SearchWithText(textInput.value);
-        }
-    });
-
-    infoWindow = new (google as any).maps.InfoWindow();
+export function checkApiKey(): string {
+  const key = GOOGLE_MAPS_API_KEY;
+  if (!key) {
+    throw new Error(
+      "Missing Google Maps API key. Pass an `apiKey` argument or set GOOGLE_MAPS_API_KEY."
+    );
+  }
+  return key;
 }
 
-export async function SearchWithText(query: string) {
-  // If running in a browser with the Maps JS API and map is initialized, use the client-side PlacesService.
-  if (typeof google !== 'undefined' && (google as any).maps && map) {
-    const placesService: any = (google as any).maps.places ? new (google as any).maps.places.PlacesService(map) : null;
-    if (placesService) {
-      const request: any = {
-        query,
-        fields: ['name', 'geometry', 'business_status', 'formatted_address', 'vicinity'],
-        locationBias: map.getCenter(),
-      };
+//const GOOGLE_PLACES_BASE = "https://places.googleapis.com/v1/places:searchText"; //text search
 
-      const results: any[] = await new Promise((resolve) => {
-        placesService.findPlaceFromQuery(request, (res: any, status: any) => {
-          if (status === (google as any).maps.places.PlacesServiceStatus.OK) {
-            resolve(res || []);
-          } else {
-            resolve([]);
-          }
-        });
+
+
+export const searchQuery = async (query: string) => {
+  try {
+    const KEY = checkApiKey();
+
+    const fieldMask = "places.displayName,places.formattedAddress" //arguments given to structure output
+
+    const body: any = { //search
+      textQuery: query
+    };
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "X-Goog-Api-Key": KEY,
+      "X-Goog-FieldMask": fieldMask
+    };
+
+
+    // Fetch the route from Google
+    const response = await fetch(
+      "https://places.googleapis.com/v1/places:searchText",
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body)
       });
 
-      return results;
+
+    // const json = await response.json();
+    // console.log(json);
+
+    // return json;
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} ${response.statusText}`);
     }
-  }
+  
+    const output = await response.json();
+    //console.log(output.places);
 
-  // Fallback: use Places Text Search REST API (works in React Native)
-  const apiKey = GOOGLE_MAPS_API_KEY;
-  if (!apiKey) throw new Error('Missing GOOGLE_MAPS_API_KEY for REST fallback');
-
-  const base = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
-  const params = new URLSearchParams({ key: apiKey, query });
-  try {
-    if (map && typeof map.getCenter === 'function') {
-      const c: any = map.getCenter();
-      if (c && typeof c.lat === 'function') {
-        params.set('location', `${c.lat()},${c.lng()}`);
-      } else if (c && c.lat != null) {
-        params.set('location', `${c.lat},${c.lng}`);
-      }
+    if (output.places) {
+      return output.places;
+    } else {
+      return [];
     }
-  } catch (e) {
-    // ignore
-  }
 
-  const url = `${base}?${params.toString()}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Places TextSearch HTTP error: ${res.status}`);
-  const data = await res.json();
-  if (data.status && data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-    throw new Error(`Places TextSearch error: ${data.status} ${data.error_message || ''}`);
+  } catch (error) {
+    console.error(error);
   }
-  return data.results || [];
-}
+};
 
+
+
+//works fine
 export async function GetPlacesInRadius(lat: number, lng: number, radius: number): Promise<PlaceResult[]> {
   const key = GOOGLE_MAPS_API_KEY;
   if (!key) throw new Error('Missing Google Maps API key (pass as 4th arg or set GOOGLE_MAPS_API_KEY)');
@@ -144,11 +134,11 @@ export async function GetPlacesInRadius(lat: number, lng: number, radius: number
 }
 
 // Only initialize the web map when running in a browser environment with the Maps JS API loaded.
-if (typeof window !== 'undefined' && typeof document !== 'undefined' && typeof google !== 'undefined' && (google as any).maps && (google as any).maps.importLibrary) {
-  initMap().catch((err) => console.error('initMap failed:', err));
-} else {
-  console.warn('Google Maps JS API not available in this runtime; skipping initMap (likely running in React Native).');
-}
+// if (typeof window !== 'undefined' && typeof document !== 'undefined' && typeof google !== 'undefined' && (google as any).maps && (google as any).maps.importLibrary) {
+//   initMap().catch((err) => console.error('initMap failed:', err));
+// } else {
+//   console.warn('Google Maps JS API not available in this runtime; skipping initMap (likely running in React Native).');
+// }
 
 /*******************************************
 EXTENSIVE LLM PROMPTING USED IN THIS FILE:

@@ -6,11 +6,11 @@ import { ThemedTextInput } from '@/components/themed-text-input';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedButton } from '@/components/ui/themed-button';
 import { Fonts } from '@/constants/theme';
+import { checkApiKey, searchQuery } from '@/scripts/google-maps-util';
 
 import polyline from '@mapbox/polyline';
 import * as Location from 'expo-location';
 import MapView, { Circle, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
-import { GOOGLE_MAPS_API_KEY } from '@env';
 
 function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
   return (
@@ -50,7 +50,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
 
   const getDirections = async (startLoc: string, destinationLoc: string) => {
     try {
-      const KEY = GOOGLE_MAPS_API_KEY;
+      const KEY = checkApiKey();
       // Fetch the route from Google
       const response = await fetch(
         'https://routes.googleapis.com/directions/v2:computeRoutes',
@@ -112,13 +112,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') return;
   
-      setTourOn(true);
-  
-  
-      // let geminiPrompt = await run();
-      // setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
-  
-  
+      setTourOn(true);  
   
       watchRef.current = await Location.watchPositionAsync(
         {
@@ -156,20 +150,41 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
     Map is a string to number key-value system. The number should be changed to whatever data type actually accesses the queried location (that way a user
     can tap the search result showing the string key and the app can then access the actual place)
     */
-    let results = new Map<string, number>();
-    // Temp values
-    results.set("The Eiffel Tower, France", 0);
-    results.set("Machu Picchu, Peru", 1);
-    results.set("Your mom", 2);
-    results.set("Westwood, CA, USA", 3);
-    results.set("Boston, MA, USA", 4);
-    results.set("Madrid, Spain", 5);
-    results.set("John Wooden Center", 6);
-    results.set("Krishna", 7);
-    results.set("Krishna Again", 8);
 
-    // TODO: POPULATE results WITH SEARCH RESULTS FROM MAPS API
-    const resultsArray: string[] = [...results.keys()];
+    const resultsArray: string[] = [];
+
+    searchQuery(text).then(ret => 
+      ret.forEach(place => {
+        //printing out to debug
+      //   console.log(
+      //   "Name:", place.displayName.text,
+      //   "\nAddress:", place.formattedAddress,
+      //   "\n------------------------"
+      // );
+
+      resultsArray.push("Name:" + place.displayName.text + "\nAddress:" + place.formattedAddress);
+      }
+    ));
+
+
+   
+
+
+
+    // //let results = new Map<string, number>();
+    // // Temp values
+    // // results.set("The Eiffel Tower, France", 0);
+    // // results.set("Machu Picchu, Peru", 1);
+    // // results.set("Your mom", 2);
+    // // results.set("Westwood, CA, USA", 3);
+    // // results.set("Boston, MA, USA", 4);
+    // // results.set("Madrid, Spain", 5);
+    // // results.set("John Wooden Center", 6);
+    // // results.set("Krishna", 7);
+    // // results.set("Krishna Again", 8);
+
+    // // TODO: POPULATE results WITH SEARCH RESULTS FROM MAPS API
+    // //const resultsArray: string[] = [...results.keys()];
     let resultsDisplay: ReactNode | null = null;
 
     function SelectSearchResult(key: string) {
@@ -177,7 +192,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
       console.log("Selected a search result: " + key);
       if (currentCoords != null) {
         console.log("Trying to get directions");
-        getDirections(currentCoords.latitude + "," + currentCoords.longitude, "10887 Lindbrook Dr, Los Angeles, CA 90024");
+        getDirections(currentCoords.latitude + "," + currentCoords.longitude, key);
       }
     }
 
@@ -197,7 +212,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
     );
 
     // Render a list if there are search results
-    if (results.size > 0) {
+    if (resultsArray.length > 0) {
       resultsDisplay = (
           <FlatList
             data={resultsArray}
@@ -206,7 +221,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
           />
       );
     } else { // If there are no search results
-      results.set("No results found", 0);
+      resultsArray["No results found"];
     }
 
     setSearchResults(resultsDisplay);
