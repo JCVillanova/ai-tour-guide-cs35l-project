@@ -178,7 +178,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
       console.log("Selected a search result: " + key);
       if (currentCoords != null) {
         console.log("Trying to get directions");
-        getDirections(currentCoords.latitude + "," + currentCoords.longitude, "10887 Lindbrook Dr, Los Angeles, CA 90024");
+        getDirections(currentCoords.latitude + "," + currentCoords.longitude, key);
       }
     }
 
