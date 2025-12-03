@@ -306,22 +306,42 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
           </ThemedText>
           <ThemedView
             style={{
-              borderColor: 'white',
-              borderRadius: 4,
-              borderWidth: 0.5,
+              alignItems: 'center',
+              flex: 1,
               height: 192,
+              justifyContent: 'center',
             }}
           >
-            <ThemedText>
+            <ThemedText
+              style={{
+                fontSize: 30,
+                lineHeight: 30,
+                textAlign: 'center',
+              }}
+            >
               Your tour will take you to {destination}
             </ThemedText>
           </ThemedView>
-          <ThemedButton
-            onPress={onHandleState}
-            content='Start Tour'
-            size='medium'
-            style={{}}
-          />
+          <ThemedView
+            style={{
+              flexDirection: 'row',
+              gap: 24,
+              justifyContent: 'center',
+            }}
+          >
+            <ThemedButton
+              onPress={() => (setTourAwaitingConfirm(false))}
+              content='Back'
+              size='medium'
+              style={{}}
+            />
+            <ThemedButton
+              onPress={onHandleState}
+              content='Start Tour'
+              size='medium'
+              style={{}}
+            />
+          </ThemedView>
         </ThemedView>
       </ThemedView>
     );
