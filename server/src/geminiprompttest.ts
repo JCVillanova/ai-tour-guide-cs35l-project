@@ -1,12 +1,18 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+// import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+import dotenv from "dotenv";
+import path from "path";
+import fs from "fs";
+
 // import Config from 'react-native-config';
 //import dotenv from 'react-native-dotenv';
 //require('react-native-dotenv').config({path: '../.env'})
 //dotenv.config({ path: findConfig('.env') });
 //import { GEMINI_KEY } from '@env';
 
-const apiKey = "";
-
+dotenv.config({ path: path.resolve(__dirname, ".env") });
+const apiKey: string | undefined = process.env.GEMINI_API_KEY;
 
 if (!apiKey) {
   console.error("GEMINI_KEY not found");
@@ -21,9 +27,7 @@ const usedSites = new Set<string>();
 export async function run(places: any) {
   const usedSitesList = Array.from(usedSites);
   const usedSitesText =
-    usedSitesList.length > 0
-      ? usedSitesList.join(', ')
-      : 'none yet';
+    usedSitesList.length > 0 ? usedSitesList.join(", ") : "none yet";
 
   const prompt = `
 You are generating narration for a walking tour.
@@ -61,22 +65,23 @@ ${places}
     return "";
   }
 
-  const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const lines = rawText
+    .split("\n")
+    .map((l: string) => l.trim())
+    .filter((l: string) => l.length > 0);
 
   if (lines.length === 0) {
     return "";
   }
 
   const placeName = lines[0];
-  const blurb = lines.slice(1).join(' ').trim();
+  const blurb = lines.slice(1).join(" ").trim();
 
   if (placeName && !usedSites.has(placeName)) {
     usedSites.add(placeName);
   }
 
-  const finalText = blurb
-    ? `${placeName}: ${blurb}`
-    : placeName;
+  const finalText = blurb ? `${placeName}: ${blurb}` : placeName;
 
   console.log("Gemini (processed):\n", finalText);
 
