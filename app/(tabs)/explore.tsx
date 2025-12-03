@@ -23,7 +23,10 @@ export default function TourScreen() {
   const [tourOn, setTourOn] = useState(false);
   const [infoBlocks, setInfoBlocks] = useState<string[]>([
   ]);
-  warmGemini();
+  useEffect(() => {
+    warmGemini();
+  })
+  
   // current gps coords
   const [currentCoords, setCurrentCoords] = useState<{
     latitude: number;
@@ -35,9 +38,9 @@ export default function TourScreen() {
   const [rangeInput, setRangeInput] = useState<string>('30');
 
   // prompt cooldown in seconds
-  const [promptIntervalSec, setPromptIntervalSec] = useState<number>(30);
+  const [promptIntervalSec, setPromptIntervalSec] = useState<number>(5);
   const [promptIntervalInput, setPromptIntervalInput] =
-    useState<string>('30');
+    useState<string>('5');
 
   const mapRef = useRef<MapView | null>(null);
   const watchRef = useRef<Location.LocationSubscription | null>(null);
@@ -124,6 +127,7 @@ export default function TourScreen() {
         );
       }
     );
+    
   };
 
   const endTour = () => {
@@ -134,6 +138,7 @@ export default function TourScreen() {
     setTourOn(false);
     
     Speech.stop();
+
     if (promptTimerRef.current) {
       clearInterval(promptTimerRef.current);
       promptTimerRef.current = null;
@@ -157,6 +162,7 @@ export default function TourScreen() {
     //     `prompted after ${promptIntervalSec} seconds`,
     //   ]);
     // }, promptIntervalSec * 1000);
+    promptGemini;
     const intervalGemini = setInterval(promptGemini, promptIntervalSec * 1000);
 
     
@@ -168,14 +174,17 @@ export default function TourScreen() {
       }
       clearInterval(intervalGemini);
     };
-  }, [tourOn, promptIntervalSec]);
+  }, [tourOn, promptIntervalSec, rangeMeters, currentCoords]);
 
 //text to speech
 useEffect(() => {
   if (infoBlocks.length === 0) return;
 
   const latest = infoBlocks[infoBlocks.length - 1];
-  Speech.speak(latest);
+  if (tourOn) {
+    Speech.speak(latest);
+  }
+ 
   return () =>{
       Speech.stop();
   };

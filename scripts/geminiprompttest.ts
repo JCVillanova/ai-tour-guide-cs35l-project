@@ -23,6 +23,7 @@ export function clearSites(){
 }
 export async function warmGemini(){
   const warm = await model.generateContent("send me only the word hello");
+  return warm;
 }
 export async function run(places: any) {
   // Turn our usedSites into a readable list for the prompt
@@ -68,6 +69,7 @@ ${places}
   if (rawText === "NO_NEW_SITE") {
     return "";
   }
+  
 
   // Expect first line = place name, second line = blurb
   const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
@@ -79,6 +81,9 @@ ${places}
   const placeName = lines[0];
   const blurb = lines.slice(1).join(' ').trim();
 
+  if (usedSites.has(placeName)) {
+    return "";
+  }
   if (placeName && !usedSites.has(placeName)) {
     usedSites.add(placeName);
   }
