@@ -3,7 +3,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Collapsible } from '@/components/ui/collapsible';
 import { Fonts } from '@/constants/theme';
-import { run } from '@/scripts/geminiprompttest';
+import { clearSites, run } from '@/scripts/geminiprompttest';
 import { GetPlacesInRadius } from '@/scripts/google-maps-util';
 import * as Location from 'expo-location';
 import * as Speech from 'expo-speech';
@@ -76,6 +76,9 @@ export default function TourScreen() {
       }
 
       const geminiPrompt = await run(placesText);
+      if(geminiPrompt==""){
+        return;
+      }
       setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
     }
   };
@@ -127,7 +130,9 @@ export default function TourScreen() {
     watchRef.current?.remove();
     watchRef.current = null;
     setInfoBlocks([]);
+    clearSites();
     setTourOn(false);
+    
     Speech.stop();
     if (promptTimerRef.current) {
       clearInterval(promptTimerRef.current);

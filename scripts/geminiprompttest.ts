@@ -16,9 +16,13 @@ if (!apiKey) {
 const genAI = new GoogleGenerativeAI(apiKey);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
+// Keep track of which specific sites have already been used
 const usedSites = new Set<string>();
-
+export function clearSites(){
+  usedSites.clear();
+}
 export async function run(places: any) {
+  // Turn our usedSites into a readable list for the prompt
   const usedSitesList = Array.from(usedSites);
   const usedSitesText =
     usedSitesList.length > 0
@@ -57,10 +61,12 @@ ${places}
 
   console.log("Gemini raw response:\n", rawText);
 
+  // If Gemini reports no new site, return empty string so nothing new is spoken/printed
   if (rawText === "NO_NEW_SITE") {
     return "";
   }
 
+  // Expect first line = place name, second line = blurb
   const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
   if (lines.length === 0) {
@@ -74,6 +80,7 @@ ${places}
     usedSites.add(placeName);
   }
 
+  // What the UI / TTS actually gets
   const finalText = blurb
     ? `${placeName}: ${blurb}`
     : placeName;
