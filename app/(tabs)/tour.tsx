@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -7,8 +7,9 @@ import { ThemedView } from '@/components/themed-view';
 import { ThemedButton } from '@/components/ui/themed-button';
 import { Fonts } from '@/constants/theme';
 
+import polyline from '@mapbox/polyline';
 import * as Location from 'expo-location';
-import MapView, { Circle, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Circle, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
 function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
   return (
@@ -34,6 +35,68 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
   const [searchResults, setSearchResults] = useState<ReactNode | null>(null);
 
   const [tourOn, setTourOn] = useState(false);
+
+  const [routeCoordinates, setRouteCoordinates] = useState<Array<{latitude: number, longitude: number}>>([]);
+
+  useEffect(() => {
+    startTour();
+    
+    // Cleanup when component unmounts
+    return () => {
+      endTour();
+    };
+  }, []);
+
+  const getDirections = async (startLoc: string, destinationLoc: string) => {
+    try {
+      const KEY = "silly api key but this time i'm not pushing it because im not a raging lunatic";
+      // Fetch the route from Google
+      const response = await fetch(
+        'https://routes.googleapis.com/directions/v2:computeRoutes',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': KEY,
+            'X-Goog-FieldMask': 'routes.polyline.encodedPolyline' // We only ask for the polyline
+          },
+          body: JSON.stringify({
+            origin: {
+              location: {
+                latLng: {
+                  latitude: currentCoords?.latitude,
+                  longitude: currentCoords?.longitude,
+                }
+              }
+            },
+            destination: {
+              address: destinationLoc
+            },
+            travelMode: 'DRIVE'
+          })
+        }
+      );
+      const json = await response.json();
+      console.log(json);
+
+      if (json.routes && json.routes.length > 0) {
+        // Google returns an encoded string for the route points
+        const encodedPolyline = json.routes[0].polyline.encodedPolyline;
+        
+        // You must decode this string into an array of {latitude, longitude}
+        const decodedPoints = polyline.decode(encodedPolyline);
+        const points = decodedPoints.map((point) => ({
+          latitude: point[0],
+          longitude: point[1]
+        }));
+        
+        console.log("Points generated:", points.length);
+        setRouteCoordinates(points);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   // current gps coords
   const [currentCoords, setCurrentCoords] = useState<{
@@ -111,6 +174,10 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
     function SelectSearchResult(key: string) {
       // TODO: Use the key passed in to access the value in the results map (will get all information about the location ideally)
       console.log("Selected a search result: " + key);
+      if (currentCoords != null) {
+        console.log("Trying to get directions");
+        getDirections(currentCoords.latitude + "," + currentCoords.longitude, "10887 Lindbrook Dr, Los Angeles, CA 90024");
+      }
     }
 
     // Each search result is a button that will call SelectSearchResult
@@ -177,16 +244,20 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
                 longitudeDelta: 0.01,
               }}
             >
-              {}
               {currentCoords && (
                 <Circle
                   center={currentCoords}
-                  radius={2000}
+                  radius={50}
                   strokeColor="rgba(26,115,232,0.9)"
                   fillColor="rgba(26,115,232,0.25)"
                   strokeWidth={2}
                 />
               )}
+              <Polyline
+                coordinates={routeCoordinates}
+                strokeColor="#ff00ff" // Fallback color
+                strokeWidth={6}
+              />
             </MapView>
       </ThemedView>
       <ThemedView
