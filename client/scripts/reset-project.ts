@@ -45,7 +45,7 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-const moveDirectories = async (userInput) => {
+const moveDirectories = async (userInput: string) => {
   try {
     if (userInput === "y") {
       // Create the app-example directory
@@ -93,14 +93,14 @@ const moveDirectories = async (userInput) => {
           : ""
       }`
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error(`❌ Error during script execution: ${error.message}`);
   }
 };
 
 rl.question(
   "Do you want to move existing files to /app-example instead of deleting them? (Y/n): ",
-  (answer) => {
+  (answer: string) => {
     const userInput = answer.trim().toLowerCase() || "y";
     if (userInput === "y" || userInput === "n") {
       moveDirectories(userInput).finally(() => rl.close());
