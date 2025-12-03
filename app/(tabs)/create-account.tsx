@@ -21,6 +21,7 @@ function CreateAccountPage() {
       return;
     }
     createAccount(email, password);
+    GoToLogin();
   }
 
   return (
