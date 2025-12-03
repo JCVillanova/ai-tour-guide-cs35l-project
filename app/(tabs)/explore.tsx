@@ -31,13 +31,13 @@ export default function TourScreen() {
   } | null>(null);
 
   // Range in meters for circle radius and prompt
-  const [rangeMeters, setRangeMeters] = useState<number>(150);
-  const [rangeInput, setRangeInput] = useState<string>('150');
+  const [rangeMeters, setRangeMeters] = useState<number>(30);
+  const [rangeInput, setRangeInput] = useState<string>('30');
 
   // prompt cooldown in seconds
-  const [promptIntervalSec, setPromptIntervalSec] = useState<number>(15);
+  const [promptIntervalSec, setPromptIntervalSec] = useState<number>(30);
   const [promptIntervalInput, setPromptIntervalInput] =
-    useState<string>('15');
+    useState<string>('30');
 
   const mapRef = useRef<MapView | null>(null);
   const watchRef = useRef<Location.LocationSubscription | null>(null);
