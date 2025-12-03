@@ -7,10 +7,10 @@ import { ThemedView } from '@/components/themed-view';
 import { ThemedButton } from '@/components/ui/themed-button';
 import { Fonts } from '@/constants/theme';
 
+import { GOOGLE_MAPS_API_KEY } from '@env';
 import polyline from '@mapbox/polyline';
 import * as Location from 'expo-location';
-import MapView, { Circle, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
-import { GOOGLE_MAPS_API_KEY } from '@env';
+import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
 function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
   return (
@@ -93,6 +93,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
         
         console.log("Points generated:", points.length);
         setRouteCoordinates(points);
+        endPoint = routeCoordinates[routeCoordinates.length - 1]
       }
     } catch (error) {
       console.error(error);
@@ -218,6 +219,8 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
     handleSearch(text)
   }
 
+  let endPoint = routeCoordinates[routeCoordinates.length - 1];
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -256,8 +259,11 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
               )}
               <Polyline
                 coordinates={routeCoordinates}
-                strokeColor="#ff00ff" // Fallback color
-                strokeWidth={6}
+                strokeColor="#682cad" // Fallback color
+                strokeWidth={7}
+              />
+              <Marker
+                coordinate={endPoint}
               />
             </MapView>
       </ThemedView>
