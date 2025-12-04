@@ -1,4 +1,4 @@
-const SERVER_URL = process.env.SERVER_URL || "http://localhost:5000";
+const SERVER_URL = process.env.SERVER_URL || "http://172.26.81.117:5000";
 
 async function handleLogin(email: string, password: string) {
   const response = await fetch(`${SERVER_URL}/login`, {
