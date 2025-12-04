@@ -229,7 +229,10 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
         ))}
       </ScrollView>
       <ThemedButton
-        onPress={() => (setTourInProgress(false))}
+        onPress={() => {
+          setTourInProgress(false);
+          tourGenerated = false;
+        }}
         content='Exit'
         size='medium'
         style={{}}

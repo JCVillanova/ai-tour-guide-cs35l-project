@@ -117,9 +117,13 @@ DISCARD: Places that require walking deep into a pedestrian-only zone to see, ge
 
 Categorize by Visit Type: For each kept location, determine if it is a "Drive-By" (visible from the car, no stop needed) or a "Stop" (requires parking and getting out to appreciate).
 
+There is no need to bold text with **
+
 Formatting Instructions (Crucial):
 
 You must separate the complete description block for each location from the next location's block using a string of "===================="s.
+
+There is no need to put a string of "====================" at the end of the last location generated
 
 The output must be formatted to clearly present the details of one location, followed by the separator, then the next location, and so on.
 
