@@ -3,7 +3,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Collapsible } from '@/components/ui/collapsible';
 import { Fonts } from '@/constants/theme';
-import { run } from '@/scripts/geminiprompttest';
+import { clearSites, run, warmGemini } from '@/scripts/geminiprompttest';
 import { GetPlacesInRadius } from '@/scripts/google-maps-util';
 import * as Location from 'expo-location';
 import * as Speech from 'expo-speech';
@@ -21,23 +21,30 @@ import MapView, { Circle, PROVIDER_GOOGLE } from 'react-native-maps';
 export default function TourScreen() {
 
   const [tourOn, setTourOn] = useState(false);
-  const [infoBlocks, setInfoBlocks] = useState<string[]>([
-  ]);
+  const [infoBlocks, setInfoBlocks] = useState<string[]>([]);
+  const infoBlocksRef = useRef<string[]>([]);
+  const ttsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const currentReadIndexRef = useRef(0);
 
+  useEffect(() => {
+    warmGemini();
+  })
+  
   // current gps coords
   const [currentCoords, setCurrentCoords] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
 
+
   // Range in meters for circle radius and prompt
-  const [rangeMeters, setRangeMeters] = useState<number>(150);
-  const [rangeInput, setRangeInput] = useState<string>('150');
+  const [rangeMeters, setRangeMeters] = useState<number>(30);
+  const [rangeInput, setRangeInput] = useState<string>('30');
 
   // prompt cooldown in seconds
-  const [promptIntervalSec, setPromptIntervalSec] = useState<number>(15);
+  const [promptIntervalSec, setPromptIntervalSec] = useState<number>(5);
   const [promptIntervalInput, setPromptIntervalInput] =
-    useState<string>('15');
+    useState<string>('5');
 
   const mapRef = useRef<MapView | null>(null);
   const watchRef = useRef<Location.LocationSubscription | null>(null);
@@ -76,6 +83,9 @@ export default function TourScreen() {
       }
 
       const geminiPrompt = await run(placesText);
+      if(geminiPrompt==""){
+        return;
+      }
       setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
     }
   };
@@ -121,14 +131,18 @@ export default function TourScreen() {
         );
       }
     );
+    
   };
 
   const endTour = () => {
     watchRef.current?.remove();
     watchRef.current = null;
     setInfoBlocks([]);
+    clearSites();
     setTourOn(false);
+    
     Speech.stop();
+
     if (promptTimerRef.current) {
       clearInterval(promptTimerRef.current);
       promptTimerRef.current = null;
@@ -152,6 +166,7 @@ export default function TourScreen() {
     //     `prompted after ${promptIntervalSec} seconds`,
     //   ]);
     // }, promptIntervalSec * 1000);
+    promptGemini;
     const intervalGemini = setInterval(promptGemini, promptIntervalSec * 1000);
 
     
@@ -163,18 +178,67 @@ export default function TourScreen() {
       }
       clearInterval(intervalGemini);
     };
-  }, [tourOn, promptIntervalSec]);
+  }, [tourOn, promptIntervalSec, rangeMeters, currentCoords]);
 
-//text to speech
 useEffect(() => {
-  if (infoBlocks.length === 0) return;
+  infoBlocksRef.current = infoBlocks;
+}, [infoBlocks]);
 
-  const latest = infoBlocks[infoBlocks.length - 1];
-  Speech.speak(latest);
-  return () =>{
+  // text to speech
+  useEffect(() => {
+    const READ_DELAY_MS = 2000; // delay between finishing one block and starting the next
+    const EMPTY_WAIT_MS = 1000; // how often to check for new blocks when caught up
+
+    // When tour stops, clean everything up
+    if (!tourOn) {
+      if (ttsTimeoutRef.current) {
+        clearTimeout(ttsTimeoutRef.current);
+        ttsTimeoutRef.current = null;
+      }
       Speech.stop();
-  };
-}, [infoBlocks, tourOn]);
+      currentReadIndexRef.current = 0;
+      return;
+    }
+
+    const readNext = () => {
+      const blocks = infoBlocksRef.current;
+      const idx = currentReadIndexRef.current;
+
+      // No new blocks yet, check again later
+      if (idx >= blocks.length) {
+        ttsTimeoutRef.current = setTimeout(readNext, EMPTY_WAIT_MS);
+        return;
+      }
+
+      const text = blocks[idx];
+      if(!tourOn){
+        return;
+      }
+      Speech.speak(text, {
+        onDone: () => {
+          currentReadIndexRef.current += 1;
+          ttsTimeoutRef.current = setTimeout(readNext, READ_DELAY_MS);// once speaking is done call read next on next block
+        },
+        onError: () => {
+          // skip block if error
+          currentReadIndexRef.current += 1;
+          ttsTimeoutRef.current = setTimeout(readNext, READ_DELAY_MS);
+        },
+      });
+    };
+
+    // start reading when tour on
+    readNext();
+
+    // cleanup if tourOn off
+    return () => {
+      if (ttsTimeoutRef.current) {
+        clearTimeout(ttsTimeoutRef.current);
+        ttsTimeoutRef.current = null;
+      }
+    };
+  }, [tourOn]);
+
 
 //input boxes
   const handleRangeChange = (text: string) => {
