@@ -6,11 +6,14 @@ import { ThemedTextInput } from '@/components/themed-text-input';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedButton } from '@/components/ui/themed-button';
 import { Fonts } from '@/constants/theme';
+import { generateTour } from '@/scripts/geminiprompttest';
 import { checkApiKey, searchQuery } from '@/scripts/google-maps-util';
 
 import polyline from '@mapbox/polyline';
 import * as Location from 'expo-location';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+
+let tourGenerated = false;
 
 function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
   return (
@@ -175,14 +178,24 @@ function TourConfirmationUI({ destination, setTourAwaitingConfirm, setTourInProg
 
 function TourInProgressUI({ destination, setTourInProgress, points }: TourInProgressUIProps) {
 
-  
+  //console.log(points); //points works here too
+
+  //console.log(generateTour(points));
+  if (!tourGenerated) {
+    tourGenerated = true
+    generateTour(points).then((places) =>
+      setInfoBlocks(infoBlocks => [...infoBlocks, places])
+    );
+
+  }
+
+
+  // const places = Array.isArray(ret) ? ret : [];
 
   const [infoBlocks, setInfoBlocks] = useState<string[]>([
-    "Your",
-    "mom",
-    "is",
-    "cool"
   ]);
+
+
   // TODO: LINK INFOBLOCKS TO GEMINI PROMPTING USING POINTS ALONG THE ROUTE
 
   return (
@@ -282,7 +295,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
           longitude: point[1]
         }));
 
-        //console.log(points);
+        //console.log(points); console.log here works
         
         console.log("Points generated:", points.length);
         setRouteCoordinates(points);
@@ -373,6 +386,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
     watchRef.current?.remove();
     watchRef.current = null;
     setTourInterfaceOn(false);
+    tourGenerated = false;
   };
 
   type SearchResultItem = {
