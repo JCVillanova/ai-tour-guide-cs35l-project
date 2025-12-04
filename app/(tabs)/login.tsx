@@ -9,6 +9,116 @@ import { useState } from "react";
 import { StyleSheet } from 'react-native';
 import { createAccount, handleLogin } from "../../scripts/backend-call";
 
+interface AuthFormProps {
+  email: string;
+  setEmail: (text: string) => void;
+  password: string;
+  setPassword: (text: string) => void;
+  setInSignUp: (val: boolean) => void;
+  onSubmit?: () => void;
+}
+
+function EnterLogonInfo({ email, setEmail, password, setPassword, setInSignUp, onSubmit }: AuthFormProps) {
+  return (
+    <ThemedView
+      style={{
+        backgroundColor: 'transparent',
+        flex: 1,
+        gap: 16,
+        height: '100%',
+        justifyContent: 'center',
+        padding: 32,
+      }}
+    >
+      <ThemedText type="title"
+        style={{
+          fontFamily: Fonts.rounded,
+          textAlign: 'center',
+        }}
+      >Login</ThemedText>
+      <ThemedTextInput
+        placeholder="Email"
+        value={email}
+        onChangeText={(text) => setEmail(text)}
+      />
+      <ThemedTextInput
+        secureTextEntry={true}
+        placeholder="Password"
+        value={password}
+        onChangeText={(text) => setPassword(text)}
+      />
+      <ThemedView
+        style={{
+          backgroundColor: 'transparent',
+          flexDirection: 'row',
+          gap: 16,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}
+      >
+        <ThemedButton onPress={onSubmit} content="Login"></ThemedButton>
+        <ThemedButton content="Sign Up" onPress={() => setInSignUp(true)} ></ThemedButton>
+      </ThemedView>
+    </ThemedView>
+  );
+}
+
+function EnterSignUpInfo({ email, setEmail, password, setPassword, setInSignUp, onSubmit }: AuthFormProps) {
+  function createAccountClick() {
+    if (email == "" || password == "") {
+      console.error("Email and password cannot be empty");
+      return;
+    }
+    createAccount(email, password);
+    setInSignUp(false);
+  }
+
+  return (
+    <ThemedView
+      style={{
+        backgroundColor: 'transparent',
+        flex: 1,
+        gap: 16,
+        height: '100%',
+        justifyContent: 'center',
+        padding: 32,
+      }}
+    >
+      <ThemedText type="title"
+        style={{
+          fontFamily: Fonts.rounded,
+          textAlign: 'center',
+        }}
+      >Create Account</ThemedText>
+      <ThemedTextInput
+        placeholder="Email"
+        value={email}
+        onChangeText={(text) => setEmail(text)}
+      />
+      <ThemedTextInput
+        secureTextEntry={true}
+        placeholder="Password"
+        value={password}
+        onChangeText={(text) => setPassword(text)}
+      />
+      <ThemedView
+        style={{
+          alignItems: 'center',
+          backgroundColor: 'transparent',
+          flexDirection: 'column',
+          gap: 16,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          marginTop: 8,
+        }}
+      >
+        <ThemedButton onPress={() => createAccountClick()} content="Create Account"></ThemedButton>
+        <ThemedButton onPress={() => setInSignUp(false)} content="Back to Login"></ThemedButton>
+      </ThemedView>
+    </ThemedView>
+  );
+}
+
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,113 +134,13 @@ function LoginPage() {
     AsyncStorage.setItem("userEmail", email);
   };
 
-  interface LoginStateProps {
-    setInSignUp: (val: boolean) => void;
-  }
-
-  function EnterLogonInfo({ setInSignUp }: LoginStateProps) {
-    return (
-      <ThemedView
-        style={{
-          backgroundColor: 'transparent',
-          flex: 1,
-          gap: 16,
-          height: '100%',
-          justifyContent: 'center',
-          padding: 32,
-        }}
-      >
-        <ThemedText type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-            textAlign: 'center',
-          }}
-        >Login</ThemedText>
-        <ThemedTextInput
-          placeholder="Email"
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-        />
-        <ThemedTextInput
-          secureTextEntry={true}
-          placeholder="Password"
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-        />
-        <ThemedView
-          style={{
-            backgroundColor: 'transparent',
-            flexDirection: 'row',
-            gap: 16,
-            marginLeft: 'auto',
-            marginRight: 'auto',
-          }}
-        >
-          <ThemedButton onPress={handleLoginClick} content="Login"></ThemedButton>
-          <ThemedButton content="Sign Up" onPress={() => setInSignUp(true)} ></ThemedButton>
-        </ThemedView>
-      </ThemedView>
-    );
-  }
-
-  function EnterSignUpInfo({ setInSignUp }: LoginStateProps) {
-    function createAccountClick() {
-      if (email == "" || password == "") {
-        console.error("Email and password cannot be empty");
-        return;
-      }
-      createAccount(email, password);
-      setInSignUp(false);
-    }
-
-    return (
-      <ThemedView
-        style={{
-          backgroundColor: 'transparent',
-          flex: 1,
-          gap: 16,
-          height: '100%',
-          justifyContent: 'center',
-          padding: 32,
-        }}
-      >
-        <ThemedText type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-            textAlign: 'center',
-          }}
-        >Create Account</ThemedText>
-        <ThemedTextInput
-          placeholder="Email"
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-        />
-        <ThemedTextInput
-          secureTextEntry={true}
-          placeholder="Password"
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-        />
-        <ThemedView
-          style={{
-            alignItems: 'center',
-            backgroundColor: 'transparent',
-            flexDirection: 'column',
-            gap: 16,
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            marginTop: 8,
-          }}
-        >
-          <ThemedButton onPress={() => createAccountClick()} content="Create Account"></ThemedButton>
-          <ThemedButton onPress={() => setInSignUp(false)} content="Back to Login"></ThemedButton>
-        </ThemedView>
-      </ThemedView>
-    );
-  }
-
-  function FormCard() {
-    return (
+  return (
+    <ThemedView
+      style={{
+        alignItems: 'center',
+        height: '100%',
+      }}
+    >
       <ThemedView
         style={{
           alignItems: 'center',
@@ -143,19 +153,25 @@ function LoginPage() {
           width: '80%',
         }}
       >
-        { inSignUp ? <EnterSignUpInfo setInSignUp={setInSignUp}/> : <EnterLogonInfo setInSignUp={setInSignUp} /> }
+        {inSignUp ? (
+          <EnterSignUpInfo
+            email={email} 
+            setEmail={setEmail} 
+            password={password} 
+            setPassword={setPassword} 
+            setInSignUp={setInSignUp}
+          />
+        ) : (
+          <EnterLogonInfo
+            email={email} 
+            setEmail={setEmail} 
+            password={password} 
+            setPassword={setPassword} 
+            setInSignUp={setInSignUp} 
+            onSubmit={handleLoginClick}
+          /> 
+        )}
       </ThemedView>
-    );
-  }
-
-  return (
-    <ThemedView
-      style={{
-        alignItems: 'center',
-        height: '100%',
-      }}
-    >
-      <FormCard />
     </ThemedView>
   );
 }
