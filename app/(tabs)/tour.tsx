@@ -8,9 +8,10 @@ import { ThemedButton } from '@/components/ui/themed-button';
 import { Fonts } from '@/constants/theme';
 import { checkApiKey, searchQuery } from '@/scripts/google-maps-util';
 
+import { GOOGLE_MAPS_API_KEY } from '@env';
 import polyline from '@mapbox/polyline';
 import * as Location from 'expo-location';
-import MapView, { Circle, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
 function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
   return (
@@ -35,16 +36,19 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState<ReactNode | null>(null);
 
-  const [tourOn, setTourOn] = useState(false);
+  const [tourInterfaceOn, setTourInterfaceOn] = useState(false);
+  const [tourAwaitingConfirm, setTourAwaitingConfirm] = useState(false);
+  const [tourInProgress, setTourInProgress] = useState(false);
 
   const [routeCoordinates, setRouteCoordinates] = useState<Array<{latitude: number, longitude: number}>>([]);
+  const [destination, setDestination] = useState('');
 
   useEffect(() => {
-    startTour();
+    startTourInterface();
     
     // Cleanup when component unmounts
     return () => {
-      endTour();
+      endTourInterface();
     };
   }, []);
 
@@ -93,6 +97,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
         
         console.log("Points generated:", points.length);
         setRouteCoordinates(points);
+        endPoint = routeCoordinates[routeCoordinates.length - 1]
       }
     } catch (error) {
       console.error(error);
@@ -108,11 +113,17 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
   const mapRef = useRef<MapView | null>(null);
   const watchRef = useRef<Location.LocationSubscription | null>(null);
 
-  const startTour = async () => {
+  const startTourInterface = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') return;
   
-      setTourOn(true);  
+      setTourInterfaceOn(true);
+  
+  
+      // let geminiPrompt = await run();
+      // setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
+  
+  
   
       watchRef.current = await Location.watchPositionAsync(
         {
@@ -138,10 +149,10 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
       );
     };
   
-    const endTour = () => {
+    const endTourInterface = () => {
       watchRef.current?.remove();
       watchRef.current = null;
-      setTourOn(false);
+      setTourInterfaceOn(false);
     };
 
   function handleSearch(text: string) {
@@ -193,6 +204,8 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
       if (currentCoords != null) {
         console.log("Trying to get directions");
         getDirections(currentCoords.latitude + "," + currentCoords.longitude, key);
+        setTourAwaitingConfirm(true);
+        setDestination(key);
       }
     }
 
@@ -233,49 +246,10 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
     handleSearch(text)
   }
 
-  return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{
-        flex: 1,
-      }}
-    >
-      <ThemedView
-        style={styles.mapContainer && {
-          flex: 1,
-          flexShrink: 1,
-        }}
-      >
-            <MapView
-              ref={(r) => {mapRef.current = r}}
-              provider={PROVIDER_GOOGLE}
-              style={StyleSheet.absoluteFill}
-              mapType="standard"
-              showsUserLocation
-              showsMyLocationButton
-              initialRegion={{
-                latitude: 34.0689,
-                longitude: -118.4452,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-              }}
-            >
-              {currentCoords && (
-                <Circle
-                  center={currentCoords}
-                  radius={50}
-                  strokeColor="rgba(26,115,232,0.9)"
-                  fillColor="rgba(26,115,232,0.25)"
-                  strokeWidth={2}
-                />
-              )}
-              <Polyline
-                coordinates={routeCoordinates}
-                strokeColor="#ff00ff" // Fallback color
-                strokeWidth={6}
-              />
-            </MapView>
-      </ThemedView>
+  let endPoint = routeCoordinates[routeCoordinates.length - 1];
+
+  function SearchUI() {
+    return (
       <ThemedView
         style={{
           flexDirection: 'column',
@@ -325,6 +299,123 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
           />
         </ThemedView>
       </ThemedView>
+    );
+  }
+
+  function TourConfirmationUI() {
+    return (
+      <ThemedView
+        style={{
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          minHeight: 400,
+          padding: 16,
+        }}
+      >
+        <ThemedView
+          style={{
+              flexDirection: 'column',
+              flexGrow: 1,
+              gap: 16,
+            }}
+        >
+          <ThemedText
+            type="title"
+            style={{
+              fontFamily: Fonts.rounded,
+            }}>
+            Confirm Tour
+          </ThemedText>
+          <ThemedView
+            style={{
+              alignItems: 'center',
+              flex: 1,
+              height: 192,
+              justifyContent: 'center',
+            }}
+          >
+            <ThemedText
+              style={{
+                fontSize: 30,
+                lineHeight: 30,
+                textAlign: 'center',
+              }}
+            >
+              Your tour will take you to {destination}
+            </ThemedText>
+          </ThemedView>
+          <ThemedView
+            style={{
+              flexDirection: 'row',
+              gap: 24,
+              justifyContent: 'center',
+            }}
+          >
+            <ThemedButton
+              onPress={() => (setTourAwaitingConfirm(false))}
+              content='Back'
+              size='medium'
+              style={{}}
+            />
+            <ThemedButton
+              onPress={onHandleState}
+              content='Start Tour'
+              size='medium'
+              style={{}}
+            />
+          </ThemedView>
+        </ThemedView>
+      </ThemedView>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{
+        flex: 1,
+      }}
+    >
+      <ThemedView
+        style={styles.mapContainer && {
+          flex: 1,
+          flexShrink: 1,
+        }}
+      >
+            <MapView
+              ref={(r) => {mapRef.current = r}}
+              provider={PROVIDER_GOOGLE}
+              style={StyleSheet.absoluteFill}
+              mapType="standard"
+              showsUserLocation
+              showsMyLocationButton
+              initialRegion={{
+                latitude: 34.0689,
+                longitude: -118.4452,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}
+            >
+              {currentCoords && (
+                <Circle
+                  center={currentCoords}
+                  radius={50}
+                  strokeColor="rgba(26,115,232,0.9)"
+                  fillColor="rgba(26,115,232,0.25)"
+                  strokeWidth={2}
+                />
+              )}
+              <Polyline
+                coordinates={routeCoordinates}
+                strokeColor="#682cad" // Fallback color
+                strokeWidth={7}
+              />
+              <Marker
+                coordinate={endPoint}
+              />
+            </MapView>
+      </ThemedView>
+      {tourAwaitingConfirm ? <TourConfirmationUI /> : <SearchUI />}
     </KeyboardAvoidingView>
   );
 }
