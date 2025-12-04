@@ -8,8 +8,6 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const apiKey = GEMINI_KEY;
 
-
-console.log(apiKey);
 if (!apiKey) {
   console.error("GEMINI_KEY not found");
   process.exit(1);
@@ -59,11 +57,46 @@ NO_NEW_SITE
 
 Now here is the list of nearby places:
 
-${places}`.trim();
-  console.log(places);
-  const result = await model.generateContent(places + "\n\nGive a summary of the places given above in list format.");
-  console.log("Gemini says:\n", result.response.text());
-  return result.response.text();
+${places}
+`.trim();
+
+  const result = await model.generateContent(prompt);
+  const rawText = result.response.text().trim();
+
+  console.log("Gemini raw response:\n", rawText);
+
+  // If Gemini reports no new site, return empty string so nothing new is spoken/printed
+  if (rawText === "NO_NEW_SITE") {
+    return "";
+  }
+  
+
+  // Expect first line = place name, second line = blurb
+  const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+  if (lines.length === 0) {
+    return "";
+  }
+
+  const placeName = lines[0];
+  const blurb = lines.slice(1).join(' ').trim();
+
+  if (usedSites.has(placeName)) {
+    return "";
+  }
+  if (placeName && !usedSites.has(placeName)) {
+    usedSites.add(placeName);
+  }
+  console.log("place name: " + placeName);
+
+  // What the UI / TTS actually gets
+  const finalText = blurb
+    ? `${placeName}: ${blurb}`
+    : placeName;
+
+  console.log("Gemini (processed):\n", finalText);
+
+  return finalText;
 }
 
 
