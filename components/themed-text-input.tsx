@@ -44,7 +44,7 @@ export function ThemedTextInput({
 const styles = StyleSheet.create({
   default: {
     borderRadius: 4,
-    borderWidth: 0.5,
+    borderWidth: 1,
     fontSize: 18,
     height: 40,
     padding: 8,

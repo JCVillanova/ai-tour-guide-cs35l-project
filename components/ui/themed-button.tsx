@@ -35,7 +35,7 @@ export function ThemedButton({
       <Pressable
         onPress={onPress}
         style={[
-          { backgroundColor: 'purple', },
+          { backgroundColor: 'purple', borderColor: '#9b579b', borderWidth: 1 },
           size === 'small' ? styles.smallButton : undefined,
           size === 'medium' ? styles.mediumButton : undefined,
           size === 'large' ? styles.largeButton : undefined,
