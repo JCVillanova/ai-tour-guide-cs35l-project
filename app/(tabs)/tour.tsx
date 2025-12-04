@@ -294,78 +294,83 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
   const watchRef = useRef<Location.LocationSubscription | null>(null);
 
   const startTourInterface = async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return;
-  
-      setTourInterfaceOn(true);
-  
-  
-      // let geminiPrompt = await run();
-      // setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
-  
-  
-  
-      watchRef.current = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 1000,
-          distanceInterval: 1,
-        },
-        (loc) => {
-          const { latitude, longitude } = loc.coords;
-  
-          setCurrentCoords({ latitude, longitude });
-  
-          if (!mapCentered) {
-            mapRef.current?.animateCamera(
-              {
-                center: { latitude, longitude },
-                zoom: 16,
-                heading: 0,
-                pitch: 0,
-              },
-              { duration: 500 }
-            );
-            setMapCentered(true);
-          }
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') return;
+
+    setTourInterfaceOn(true);
+
+
+    // let geminiPrompt = await run();
+    // setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
+
+
+
+    watchRef.current = await Location.watchPositionAsync(
+      {
+        accuracy: Location.Accuracy.High,
+        timeInterval: 1000,
+        distanceInterval: 1,
+      },
+      (loc) => {
+        const { latitude, longitude } = loc.coords;
+
+        setCurrentCoords({ latitude, longitude });
+
+        if (!mapCentered) {
+          mapRef.current?.animateCamera(
+            {
+              center: { latitude, longitude },
+              zoom: 16,
+              heading: 0,
+              pitch: 0,
+            },
+            { duration: 500 }
+          );
+          setMapCentered(true);
         }
-      );
-    };
+      }
+    );
+  };
   
-    const endTourInterface = () => {
-      watchRef.current?.remove();
-      watchRef.current = null;
-      setTourInterfaceOn(false);
-    };
+  const endTourInterface = () => {
+    watchRef.current?.remove();
+    watchRef.current = null;
+    setTourInterfaceOn(false);
+  };
+
+  type SearchResultItem = {
+    name: string;
+    address: string;
+  };
 
   async function handleSearch(text: string) {
     // Search for results
     const ret = await searchQuery(text)
     const places = Array.isArray(ret) ? ret : [];
-    const resultsArray: string[] = [];
+    const resultsData: SearchResultItem[] = [];
     places.forEach((place) => {
       const name = place?.displayName?.text || "Unknown Place";
       const address = place?.formattedAddress || "No Address";
-      resultsArray.push(`Name: ${name}\nAddress: ${address}`);
+      resultsData.push({ name, address });
     });
 
     // // // TODO: POPULATE results WITH SEARCH RESULTS FROM MAPS API
     // const resultsArray: string[] = [...results.keys()];
     let resultsDisplay: ReactNode | null = null;
 
-    function SelectSearchResult(key: string) {
+    function SelectSearchResult(item: SearchResultItem) {
       // TODO: Use the key passed in to access the value in the results map (will get all information about the location ideally)
-      console.log("Selected a search result: " + key);
+      console.log("Selected a search result: " + item.name);
       if (currentCoords != null) {
         console.log("Trying to get directions");
-        getDirections(currentCoords.latitude + "," + currentCoords.longitude, key);
+        getDirections(currentCoords.latitude + "," + currentCoords.longitude, item.address);
         setTourAwaitingConfirm(true);
-        setDestination(key);
+        setDestination(item.name);
       }
     }
 
     // Each search result is a button that will call SelectSearchResult
-    const renderSearchResult = ({ item }: { item: string }) => (
+    const renderSearchResult = ({ item }: { item: SearchResultItem }) => (
       <Pressable
         style={({ pressed }) => [
           {
@@ -374,22 +379,24 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
         ]}
         onPress={() => SelectSearchResult(item)}
       >
-        <ThemedText style={styles.searchResultText}>{item}</ThemedText>
+        <ThemedText style={styles.searchResultText}>
+          Name: {item.name}{"\n"}Address: {item.address}
+        </ThemedText>
         <ThemedView style={styles.horizontalDivider}></ThemedView>
       </Pressable>
     );
 
     // Render a list if there are search results
-    if (resultsArray.length > 0) {
+    if (resultsData.length > 0) {
       resultsDisplay = (
           <FlatList
-            data={resultsArray}
+            data={resultsData}
             renderItem={renderSearchResult}
             style={styles.searchResults}
           />
       );
     } else { // If there are no search results
-      resultsArray["No results found"];
+      resultsData["No results found"];
     }
 
     setSearchResults(resultsDisplay);
