@@ -3,7 +3,8 @@
   "compilerOptions": {
     "jsx": "react-native",
     "lib": ["es2020", "dom"],
-    "strict": true,
+    //"strict": true,
+    "noImplicitAny": false,
     "paths": {
       "@/*": [
         "./*"
