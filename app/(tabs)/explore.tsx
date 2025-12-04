@@ -1,7 +1,6 @@
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
 import { Fonts } from '@/constants/theme';
 import { clearSites, run, warmGemini } from '@/scripts/geminiprompttest';
 import { GetPlacesInRadius } from '@/scripts/google-maps-util';
@@ -19,23 +18,27 @@ import {
 import MapView, { Circle, PROVIDER_GOOGLE } from 'react-native-maps';
 
 export default function TourScreen() {
-
   const [tourOn, setTourOn] = useState(false);
   const [infoBlocks, setInfoBlocks] = useState<string[]>([]);
   const infoBlocksRef = useRef<string[]>([]);
   const ttsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const currentReadIndexRef = useRef(0);
+  const tourOnRef = useRef(false);
 
   useEffect(() => {
     warmGemini();
-  })
-  
+  }, []);
+
+  // keep tourOnRef in sync with state
+  useEffect(() => {
+    tourOnRef.current = tourOn;
+  }, [tourOn]);
+
   // current gps coords
   const [currentCoords, setCurrentCoords] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
-
 
   // Range in meters for circle radius and prompt
   const [rangeMeters, setRangeMeters] = useState<number>(30);
@@ -67,7 +70,12 @@ export default function TourScreen() {
   const promptGemini = async () => {
     if (currentCoords) {
       // Await the places search so we pass meaningful text to the Gemini prompt
-      const places = await GetPlacesInRadius(currentCoords.latitude, currentCoords.longitude, rangeMeters, "AIzaSyCeVPoJrwSedLMPpMtiCfP7bagnRRwtD18");
+      const places = await GetPlacesInRadius(
+        currentCoords.latitude,
+        currentCoords.longitude,
+        rangeMeters,
+        'AIzaSyCeVPoJrwSedLMPpMtiCfP7bagnRRwtD18'
+      );
 
       // Convert results to readable text (name / vicinity / formatted_address)
       let placesText: string;
@@ -83,31 +91,18 @@ export default function TourScreen() {
       }
 
       const geminiPrompt = await run(placesText);
-      if(geminiPrompt==""){
+      if (geminiPrompt == '') {
         return;
       }
-      setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
+      setInfoBlocks((infoBlocks) => [...infoBlocks, geminiPrompt]);
     }
   };
-
-  // useEffect(() => {
-  //   const intervalId = setInterval(promptGemini, promptIntervalSec * 1000);
-  //   return () => {
-  //     clearInterval(intervalId);
-  //   };
-  // }, []);
 
   const startTour = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') return;
 
     setTourOn(true);
-
-
-    // let geminiPrompt = await run();
-    // setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
-
-
 
     watchRef.current = await Location.watchPositionAsync(
       {
@@ -131,7 +126,6 @@ export default function TourScreen() {
         );
       }
     );
-    
   };
 
   const endTour = () => {
@@ -140,14 +134,13 @@ export default function TourScreen() {
     setInfoBlocks([]);
     clearSites();
     setTourOn(false);
-    
+
     Speech.stop();
 
     if (promptTimerRef.current) {
       clearInterval(promptTimerRef.current);
       promptTimerRef.current = null;
     }
-    
   };
 
   useEffect(() => {
@@ -160,16 +153,10 @@ export default function TourScreen() {
       return;
     }
 
-    // promptTimerRef.current = setInterval(() => {
-    //   setInfoBlocks((prev) => [
-    //     ...prev,
-    //     `prompted after ${promptIntervalSec} seconds`,
-    //   ]);
-    // }, promptIntervalSec * 1000);
-    promptGemini;
-    const intervalGemini = setInterval(promptGemini, promptIntervalSec * 1000);
-
-    
+    const intervalGemini = setInterval(
+      promptGemini,
+      promptIntervalSec * 1000
+    );
 
     return () => {
       if (promptTimerRef.current) {
@@ -180,9 +167,9 @@ export default function TourScreen() {
     };
   }, [tourOn, promptIntervalSec, rangeMeters, currentCoords]);
 
-useEffect(() => {
-  infoBlocksRef.current = infoBlocks;
-}, [infoBlocks]);
+  useEffect(() => {
+    infoBlocksRef.current = infoBlocks;
+  }, [infoBlocks]);
 
   // text to speech
   useEffect(() => {
@@ -201,6 +188,9 @@ useEffect(() => {
     }
 
     const readNext = () => {
+      // Always gate on ref so late callbacks can't restart after End Tour
+      if (!tourOnRef.current) return;
+
       const blocks = infoBlocksRef.current;
       const idx = currentReadIndexRef.current;
 
@@ -211,18 +201,24 @@ useEffect(() => {
       }
 
       const text = blocks[idx];
-      if(!tourOn){
-        return;
-      }
+
       Speech.speak(text, {
         onDone: () => {
+          if (!tourOnRef.current) return;
           currentReadIndexRef.current += 1;
-          ttsTimeoutRef.current = setTimeout(readNext, READ_DELAY_MS);// once speaking is done call read next on next block
+          ttsTimeoutRef.current = setTimeout(
+            readNext,
+            READ_DELAY_MS
+          );
         },
         onError: () => {
+          if (!tourOnRef.current) return;
           // skip block if error
           currentReadIndexRef.current += 1;
-          ttsTimeoutRef.current = setTimeout(readNext, READ_DELAY_MS);
+          ttsTimeoutRef.current = setTimeout(
+            readNext,
+            READ_DELAY_MS
+          );
         },
       });
     };
@@ -230,7 +226,7 @@ useEffect(() => {
     // start reading when tour on
     readNext();
 
-    // cleanup if tourOn off
+    // cleanup if tourOn off or effect re-runs
     return () => {
       if (ttsTimeoutRef.current) {
         clearTimeout(ttsTimeoutRef.current);
@@ -239,8 +235,7 @@ useEffect(() => {
     };
   }, [tourOn]);
 
-
-//input boxes
+  // input boxes
   const handleRangeChange = (text: string) => {
     setRangeInput(text);
     const value = parseFloat(text);
@@ -266,47 +261,23 @@ useEffect(() => {
           headerDisplay={false}
           style={{}}
         >
-          <ThemedView style={styles.titleContainer}>
-            <ThemedText type="title" style={{ fontFamily: Fonts.rounded }}>
+          <ThemedView style={styles.exploreContainer}>
+            <ThemedText type="title" style={styles.exploreTitle}>
               Explore
             </ThemedText>
-          </ThemedView>
 
-          <View style={styles.centerArea}>
             <Pressable style={styles.primaryBtn} onPress={startTour}>
               <Text style={styles.primaryBtnText}>Start Tour</Text>
             </Pressable>
-          </View>
-
-          <ThemedText>Todos for this tab are listed below:</ThemedText>
-
-          <Collapsible title="Include some kind of maps API - done">
-            <ThemedText>
-              Already done: connected to google maps view, should move with
-              location
-            </ThemedText>
-          </Collapsible>
-          <Collapsible title="Retrieve information - connect to some LLM to generate information">
-            <ThemedText>- Should be able to search for a location</ThemedText>
-            <ThemedText>
-              - Should be able to generate information about said location
-            </ThemedText>
-            <ThemedText>
-              - Maybe highlight direction or point on map that is being talked
-              about
-            </ThemedText>
-            <ThemedText>
-              - Show a circle on what is being scanned for being
-              information-worthy (radius in which info is being searched up for)
-            </ThemedText>
-          </Collapsible>
+          </ThemedView>
         </ParallaxScrollView>
       ) : (
         <View style={styles.tourContainer}>
-          {}
           <View style={styles.mapContainer}>
             <MapView
-              ref={(r) => {mapRef.current = r}}
+              ref={(r) => {
+                mapRef.current = r;
+              }}
               provider={PROVIDER_GOOGLE}
               style={StyleSheet.absoluteFill}
               mapType="standard"
@@ -319,7 +290,6 @@ useEffect(() => {
                 longitudeDelta: 0.01,
               }}
             >
-              {}
               {currentCoords && (
                 <Circle
                   center={currentCoords}
@@ -336,7 +306,6 @@ useEffect(() => {
             </Pressable>
           </View>
 
-          {}
           <View style={styles.controlsContainer}>
             <View style={styles.controlGroup}>
               <Text style={styles.controlLabel}>Range (meters):</Text>
@@ -363,7 +332,6 @@ useEffect(() => {
             </View>
           </View>
 
-          {}
           <View style={styles.infoContainer}>
             <ScrollView
               style={styles.infoScroll}
@@ -384,9 +352,16 @@ useEffect(() => {
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  exploreContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 64,
+  },
+  exploreTitle: {
+    fontFamily: Fonts.rounded,
+    fontSize: 32,
+    marginBottom: 16,
   },
   centerArea: {
     alignItems: 'center',
@@ -439,7 +414,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#444',
   },
-
   infoContainer: {
     flex: 1, // bottom half
     backgroundColor: '#101010',
@@ -459,7 +433,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
-
   infoScroll: {
     flex: 1,
   },
