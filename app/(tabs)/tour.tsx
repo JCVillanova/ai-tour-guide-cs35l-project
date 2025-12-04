@@ -178,6 +178,7 @@ function TourInProgressUI({ destination, setTourInProgress }: TourInProgressUIPr
     "is",
     "cool"
   ]);
+  // TODO: LINK INFOBLOCKS TO GEMINI PROMPTING USING POINTS ALONG THE ROUTE
 
   return (
     <ThemedView style={{
@@ -389,12 +390,9 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
       resultsData.push({ name, address });
     });
 
-    // // // TODO: POPULATE results WITH SEARCH RESULTS FROM MAPS API
-    // const resultsArray: string[] = [...results.keys()];
     let resultsDisplay: ReactNode | null = null;
 
     function SelectSearchResult(item: SearchResultItem) {
-      // TODO: Use the key passed in to access the value in the results map (will get all information about the location ideally)
       console.log("Selected a search result: " + item.name);
       if (currentCoords != null) {
         console.log("Trying to get directions");
