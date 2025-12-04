@@ -100,7 +100,6 @@ ${places}
 }
 
 
-
 export async function generateTour(places: any) {
   // Turn our usedSites into a readable list for the prompt
   const prompt = `
@@ -150,12 +149,6 @@ ${JSON.stringify(places, null, 2)}
   const placeName = lines[0];
   const blurb = lines.slice(1).join(' ').trim();
 
-  if (usedSites.has(placeName)) {
-    return "";
-  }
-  if (placeName && !usedSites.has(placeName)) {
-    usedSites.add(placeName);
-  }
   console.log("place name: " + placeName);
 
   // What the UI / TTS actually gets
