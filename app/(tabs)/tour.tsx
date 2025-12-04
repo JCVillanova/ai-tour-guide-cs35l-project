@@ -338,47 +338,38 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
       setTourInterfaceOn(false);
     };
 
-  function handleSearch(text: string) {
+  async function handleSearch(text: string) {
     /*
     TODO: IMPLEMENT SEARCH FUNCTIONALITY
     Map is a string to number key-value system. The number should be changed to whatever data type actually accesses the queried location (that way a user
     can tap the search result showing the string key and the app can then access the actual place)
     */
 
+    const ret = await searchQuery(text)
+
     const resultsArray: string[] = [];
     
 
-    searchQuery(text).then(ret => 
-      ret.forEach(place => {
-        //printing out to debug
+    ret.forEach(place => {
+      //printing out to debug
       //   console.log(
       //   "Name:", place.displayName.text,
       //   "\nAddress:", place.formattedAddress,
       //   "\n--------- ---------------"
       // );
 
-      resultsArray.push("Name:" + place.displayName.text + "\nAddress:" + place.formattedAddress);
+      resultsArray.push("Name: " + place.displayName.text + "\nAddress: " + place.formattedAddress);
 
       console.log(resultsArray[0]);   
-      }
-    ));
+    }
+    );
 
-
+    
    
 
 
 
     // let results = new Map<string, number>();
-    // //Temp values
-    // results.set("The Eiffel Tower, France", 0);
-    // results.set("Machu Picchu, Peru", 1);
-    // results.set("Your mom", 2);
-    // results.set("Westwood, CA, USA", 3);
-    // results.set("Boston, MA, USA", 4);
-    // results.set("Madrid, Spain", 5);
-    // results.set("John Wooden Center", 6);
-    // results.set("Krishna", 7);
-    // results.set("Krishna Again", 8);
 
     // // // TODO: POPULATE results WITH SEARCH RESULTS FROM MAPS API
     // const resultsArray: string[] = [...results.keys()];
