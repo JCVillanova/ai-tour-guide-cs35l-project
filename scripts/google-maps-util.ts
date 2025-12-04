@@ -78,7 +78,7 @@ export const searchQuery = async (query: string) => {
     }
 
   } catch (error) {
-    console.error(error);
+    return [];
   }
 };
 

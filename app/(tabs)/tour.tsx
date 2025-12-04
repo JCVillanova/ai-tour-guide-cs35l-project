@@ -341,9 +341,13 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
   async function handleSearch(text: string) {
     // Search for results
     const ret = await searchQuery(text)
-    const places = ret || [];
+    const places = Array.isArray(ret) ? ret : [];
     const resultsArray: string[] = [];
-    places.forEach(place => { resultsArray.push("Name: " + place.displayName.text + "\nAddress: " + place.formattedAddress) });
+    places.forEach((place) => {
+      const name = place?.displayName?.text || "Unknown Place";
+      const address = place?.formattedAddress || "No Address";
+      resultsArray.push(`Name: ${name}\nAddress: ${address}`);
+    });
 
     // // // TODO: POPULATE results WITH SEARCH RESULTS FROM MAPS API
     // const resultsArray: string[] = [...results.keys()];
