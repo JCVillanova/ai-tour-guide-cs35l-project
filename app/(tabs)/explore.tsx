@@ -70,12 +70,7 @@ export default function TourScreen() {
   const promptGemini = async () => {
     if (currentCoords) {
       // Await the places search so we pass meaningful text to the Gemini prompt
-      const places = await GetPlacesInRadius(
-        currentCoords.latitude,
-        currentCoords.longitude,
-        rangeMeters,
-        'AIzaSyCeVPoJrwSedLMPpMtiCfP7bagnRRwtD18'
-      );
+      const places = await GetPlacesInRadius(currentCoords.latitude, currentCoords.longitude, rangeMeters);
 
       // Convert results to readable text (name / vicinity / formatted_address)
       let placesText: string;
@@ -153,10 +148,7 @@ export default function TourScreen() {
       return;
     }
 
-    const intervalGemini = setInterval(
-      promptGemini,
-      promptIntervalSec * 1000
-    );
+    const intervalGemini = setInterval(promptGemini, promptIntervalSec * 1000);
 
     return () => {
       if (promptTimerRef.current) {
