@@ -1,7 +1,7 @@
-const SERVER_URL = process.env.SERVER_URL || "http://172.26.81.117:5000";
+const SERVER_URL = "http://172.26.81.117:3000";
 
 async function handleLogin(email: string, password: string) {
-  const response = await fetch(`${SERVER_URL}/login`, {
+  const response = await fetch(`${SERVER_URL}/users/authenticate`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -12,8 +12,9 @@ async function handleLogin(email: string, password: string) {
 }
 
 async function createAccount(email: string, password: string) {
-  const response = await fetch(`${SERVER_URL}/create-account`, {
-    method: "POST",
+  console.log("Server URL:", SERVER_URL);
+  const response = await fetch(`${SERVER_URL}/users`, {
+    method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
@@ -96,13 +97,13 @@ async function getUserHistory(email: string): Promise<string[]> {
   return data.history;
 }
 
-async function getTourNarration(places: string): Promise<string> {
+async function getTourNarration(placesText: string): Promise<string> {
   const response = await fetch(`${SERVER_URL}/tour-narration`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ places }),
+    body: JSON.stringify({ placesText }),
   });
 
   if (!response.ok) {
