@@ -12,6 +12,7 @@ import { createAccount, handleLogin } from "../../scripts/backend-call";
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [inSignUp, setInSignUp] = useState(false);
   const router = useRouter();
 
   const handleLoginClick = async () => {
@@ -83,8 +84,22 @@ function LoginPage() {
     }
 
     return (
-      <ThemedView>
-        <ThemedText type="title">Create Account</ThemedText>
+      <ThemedView
+        style={{
+          backgroundColor: 'transparent',
+          flex: 1,
+          gap: 16,
+          height: '100%',
+          justifyContent: 'center',
+          padding: 32,
+        }}
+      >
+        <ThemedText type="title"
+          style={{
+            fontFamily: Fonts.rounded,
+            textAlign: 'center',
+          }}
+        >Create Account</ThemedText>
         <ThemedTextInput
           placeholder="Email"
           value={email}
@@ -96,19 +111,25 @@ function LoginPage() {
           value={password}
           onChangeText={(text) => setPassword(text)}
         />
-        <ThemedButton
-          onPress={() => createAccountClick()}
-          content="Create Account"
-        ></ThemedButton>
-
-        <ThemedButton content="Back to Login" onPress={() => setInSignUp(false)}></ThemedButton>
+        <ThemedView
+          style={{
+            alignItems: 'center',
+            backgroundColor: 'transparent',
+            flexDirection: 'column',
+            gap: 16,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            marginTop: 8,
+          }}
+        >
+          <ThemedButton onPress={() => createAccountClick()} content="Create Account"></ThemedButton>
+          <ThemedButton onPress={() => setInSignUp(false)} content="Back to Login"></ThemedButton>
+        </ThemedView>
       </ThemedView>
     );
   }
 
   function FormCard() {
-    const [inSignUp, setInSignUp] = useState(false);
-
     return (
       <ThemedView
         style={{
@@ -117,8 +138,9 @@ function LoginPage() {
           borderColor: 'white',
           borderRadius: 24,
           borderWidth: 1,
-          height: '35%',
+          height: inSignUp ? '45%' : '35%',
           margin: 'auto',
+          width: '80%',
         }}
       >
         { inSignUp ? <EnterSignUpInfo setInSignUp={setInSignUp}/> : <EnterLogonInfo setInSignUp={setInSignUp} /> }
