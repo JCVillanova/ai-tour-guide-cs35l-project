@@ -42,6 +42,7 @@ interface TourConfirmationUIProps {
   destination: string;
   setTourAwaitingConfirm: (val: boolean) => void;
   setTourInProgress: (val: boolean) => void;
+  CenterMap: () => void;
 }
 
 interface TourInProgressUIProps {
@@ -103,7 +104,7 @@ function SearchUI({ onHandleState, handleTextChange, searchResults }: SearchUIPr
   );
 }
 
-function TourConfirmationUI({ destination, setTourAwaitingConfirm, setTourInProgress }: TourConfirmationUIProps) {
+function TourConfirmationUI({ destination, setTourAwaitingConfirm, setTourInProgress, CenterMap }: TourConfirmationUIProps) {
   return (
     <ThemedView
       style={{
@@ -159,7 +160,7 @@ function TourConfirmationUI({ destination, setTourAwaitingConfirm, setTourInProg
             style={{}}
           />
           <ThemedButton
-            onPress={() => (setTourInProgress(true))}
+            onPress={() => (setTourInProgress(true), CenterMap())}
             content='Start Tour'
             size='medium'
             style={{}}
@@ -343,6 +344,28 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
       }
     );
   };
+
+  async function CenterMap() {
+    watchRef.current = await Location.watchPositionAsync(
+      {
+        accuracy: Location.Accuracy.High,
+        timeInterval: 1000,
+        distanceInterval: 1,
+      },
+      (loc) => {
+        const { latitude, longitude } = loc.coords;
+        mapRef.current?.animateCamera(
+          {
+            center: { latitude, longitude },
+            zoom: 16,
+            heading: 0,
+            pitch: 0,
+          },
+          { duration: 500 }
+        );
+      }
+    );
+  }
   
   const endTourInterface = () => {
     watchRef.current?.remove();
@@ -477,6 +500,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
         destination={destination}
         setTourAwaitingConfirm={setTourAwaitingConfirm}
         setTourInProgress={setTourInProgress}
+        CenterMap={CenterMap}
       />) : 
       <SearchUI
         onHandleState={onHandleState}
