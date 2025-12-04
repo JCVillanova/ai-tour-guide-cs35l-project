@@ -8,6 +8,7 @@ import { ThemedButton } from '@/components/ui/themed-button';
 import { Fonts } from '@/constants/theme';
 import { generateTour } from '@/scripts/geminiprompttest';
 import { checkApiKey, searchQuery } from '@/scripts/google-maps-util';
+import * as Speech from 'expo-speech';
 
 import polyline from '@mapbox/polyline';
 import * as Location from 'expo-location';
@@ -241,6 +242,8 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
   );
 }
 
+
+
 function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState<ReactNode | null>(null);
@@ -253,6 +256,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
   const [destination, setDestination] = useState('');
   const [mapCentered, setMapCentered] = useState(false);
 
+  
   useEffect(() => {
     startTourInterface();
     
