@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedTextInput } from '@/components/themed-text-input';
@@ -336,13 +336,54 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
               style={{}}
             />
             <ThemedButton
-              onPress={onHandleState}
+              onPress={() => (setTourInProgress(true))}
               content='Start Tour'
               size='medium'
               style={{}}
             />
           </ThemedView>
         </ThemedView>
+      </ThemedView>
+    );
+  }
+
+  function TourInProgressUI() {
+    const [infoBlocks, setInfoBlocks] = useState<string[]>([
+      "Your",
+      "mom",
+      "is",
+      "cool"
+    ]);
+
+    return (
+      <ThemedView style={{
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        minHeight: 400,
+        padding: 16,
+      }}>
+        <ThemedText type='subtitle'
+          style={{
+            fontFamily: Fonts.rounded,
+          }}
+        >En route to {destination}</ThemedText>
+        <ScrollView
+          style={styles.infoScroll}
+          contentContainerStyle={styles.infoScrollContent}
+        >
+          {infoBlocks.map((block, index) => (
+            <ThemedView key={index} style={styles.infoBlock}>
+              <ThemedText style={styles.infoBullet}>{'\u2022'}</ThemedText>
+              <ThemedText style={styles.infoText}>{block}</ThemedText>
+            </ThemedView>
+          ))}
+        </ScrollView>
+        <ThemedButton
+          onPress={() => (setTourInProgress(false))}
+          content='Exit'
+          size='medium'
+          style={{}}
+        />
       </ThemedView>
     );
   }
@@ -393,7 +434,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
               />
             </MapView>
       </ThemedView>
-      {tourAwaitingConfirm ? <TourConfirmationUI /> : <SearchUI />}
+      {tourAwaitingConfirm ? (tourInProgress ? <TourInProgressUI /> : <TourConfirmationUI />) : <SearchUI />}
     </KeyboardAvoidingView>
   );
 }
@@ -436,6 +477,38 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     borderWidth: 0.5,
     height: 0,
+  },
+  infoBlock: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 12,
+    borderRadius: 10,
+    backgroundColor: '#1e1e1e',
+  },
+  infoBullet: {
+    marginRight: 8,
+    marginTop: 2,
+    color: '#ffffff',
+    fontSize: 16,
+  },
+  infoContainer: {
+    flex: 1, // bottom half
+    backgroundColor: '#101010',
+    borderTopWidth: 1,
+    borderTopColor: '#333',
+  },
+  infoScroll: {
+    flex: 1,
+  },
+  infoScrollContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 12,
+  },
+  infoText: {
+    flex: 1,
+    color: '#ffffff',
+    fontSize: 14,
   },
   mapContainer: {
     flex: 1,
