@@ -599,11 +599,13 @@ const styles = StyleSheet.create({
     borderTopColor: '#333',
   },
   infoScroll: {
+    borderRadius: 16,
     flex: 1,
+    marginBottom: 16,
+    marginTop: 16,
   },
   infoScrollContent: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
     gap: 12,
   },
   infoText: {
