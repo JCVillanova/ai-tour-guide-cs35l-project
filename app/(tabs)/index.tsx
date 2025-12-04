@@ -205,9 +205,6 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
     });
   }
 
-
-  // TODO: LINK INFOBLOCKS TO GEMINI PROMPTING USING POINTS ALONG THE ROUTE
-
   return (
     <ThemedView style={{
       flexDirection: 'column',
@@ -581,8 +578,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     padding: 12,
+    borderColor: 'white',
     borderRadius: 10,
-    backgroundColor: '#1e1e1e',
+    borderWidth: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
   infoBullet: {
     marginRight: 8,
