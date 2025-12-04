@@ -2,6 +2,7 @@ const express = require("express");
 import { Request, Response } from "express";
 const router = express.Router();
 const User = require("../models/User"); // Mongoose model
+import { run } from "./geminiprompttest";
 
 // async function storeUserData(req: any, res: any) {
 //   try {
@@ -124,17 +125,33 @@ router.get("/users/:id/history", async (req: Request, res: Response) => {
   }
 });
 
-router.getLocationInfoByName,
-  async (req: Request, res: Response) => {
+router.get("/location-info", async (req: Request, res: Response) => {
+  try {
     const locationName = req.query.name as string;
+
+    if (!locationName) {
+      return res.status(400).json({ message: "Location name is required" });
+    }
+
     // Implement logic to fetch location info by name
     res.json({ info: `Info for location: ${locationName}` });
-  };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return res.status(500).json({ message });
+  }
+});
 
-router.getLocationsNearby,
-  async (req: Request, res: Response) => {
+router.get("/locations-nearby", async (req: Request, res: Response) => {
+  try {
     const latitude = parseFloat(req.query.latitude as string);
     const longitude = parseFloat(req.query.longitude as string);
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+      return res
+        .status(400)
+        .json({ message: "Valid latitude and longitude are required" });
+    }
+
     // Implement logic to fetch nearby locations based on latitude and longitude
     res.json({
       locations: [
@@ -142,9 +159,43 @@ router.getLocationsNearby,
         `Location2 near (${latitude}, ${longitude})`,
       ],
     });
-  };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return res.status(500).json({ message });
+  }
+});
 
-router.get("/");
+router.post("/tour-narration", async (req: Request, res: Response) => {
+  try {
+    const { places } = req.body;
+
+    if (!places) {
+      return res.status(400).json({ message: "Places array is required" });
+    }
+
+    if (!Array.isArray(places) || places.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Places must be a non-empty array" });
+    }
+
+    const placesText = places.join("\n");
+    const narration = await run(placesText);
+
+    if (!narration) {
+      return res
+        .status(200)
+        .json({ message: "No new sites available", narration: "" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Narration generated successfully", narration });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return res.status(500).json({ message });
+  }
+});
 
 module.exports = router;
 
