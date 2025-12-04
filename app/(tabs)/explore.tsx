@@ -21,8 +21,11 @@ import MapView, { Circle, PROVIDER_GOOGLE } from 'react-native-maps';
 export default function TourScreen() {
 
   const [tourOn, setTourOn] = useState(false);
-  const [infoBlocks, setInfoBlocks] = useState<string[]>([
-  ]);
+  const [infoBlocks, setInfoBlocks] = useState<string[]>([]);
+  const infoBlocksRef = useRef<string[]>([]);
+  const ttsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const currentReadIndexRef = useRef(0);
+
   useEffect(() => {
     warmGemini();
   })
@@ -32,6 +35,7 @@ export default function TourScreen() {
     latitude: number;
     longitude: number;
   } | null>(null);
+
 
   // Range in meters for circle radius and prompt
   const [rangeMeters, setRangeMeters] = useState<number>(30);
@@ -176,19 +180,65 @@ export default function TourScreen() {
     };
   }, [tourOn, promptIntervalSec, rangeMeters, currentCoords]);
 
-//text to speech
 useEffect(() => {
-  if (infoBlocks.length === 0) return;
+  infoBlocksRef.current = infoBlocks;
+}, [infoBlocks]);
 
-  const latest = infoBlocks[infoBlocks.length - 1];
-  if (tourOn) {
-    Speech.speak(latest);
-  }
- 
-  return () =>{
+  // text to speech
+  useEffect(() => {
+    const READ_DELAY_MS = 2000; // delay between finishing one block and starting the next
+    const EMPTY_WAIT_MS = 1000; // how often to check for new blocks when caught up
+
+    // When tour stops, clean everything up
+    if (!tourOn) {
+      if (ttsTimeoutRef.current) {
+        clearTimeout(ttsTimeoutRef.current);
+        ttsTimeoutRef.current = null;
+      }
       Speech.stop();
-  };
-}, [infoBlocks, tourOn]);
+      currentReadIndexRef.current = 0;
+      return;
+    }
+
+    const readNext = () => {
+      const blocks = infoBlocksRef.current;
+      const idx = currentReadIndexRef.current;
+
+      // No new blocks yet, check again later
+      if (idx >= blocks.length) {
+        ttsTimeoutRef.current = setTimeout(readNext, EMPTY_WAIT_MS);
+        return;
+      }
+
+      const text = blocks[idx];
+      if(!tourOn){
+        return;
+      }
+      Speech.speak(text, {
+        onDone: () => {
+          currentReadIndexRef.current += 1;
+          ttsTimeoutRef.current = setTimeout(readNext, READ_DELAY_MS);// once speaking is done call read next on next block
+        },
+        onError: () => {
+          // skip block if error
+          currentReadIndexRef.current += 1;
+          ttsTimeoutRef.current = setTimeout(readNext, READ_DELAY_MS);
+        },
+      });
+    };
+
+    // start reading when tour on
+    readNext();
+
+    // cleanup if tourOn off
+    return () => {
+      if (ttsTimeoutRef.current) {
+        clearTimeout(ttsTimeoutRef.current);
+        ttsTimeoutRef.current = null;
+      }
+    };
+  }, [tourOn]);
+
 
 //input boxes
   const handleRangeChange = (text: string) => {
