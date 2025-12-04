@@ -1,11 +1,7 @@
+import { GEMINI_KEY } from '@env';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-// import Config from 'react-native-config';
-//import dotenv from 'react-native-dotenv';
-//require('react-native-dotenv').config({path: '../.env'})
-//dotenv.config({ path: findConfig('.env') });
-//import { GEMINI_KEY } from '@env';
 
-const apiKey = "";
+const apiKey = GEMINI_KEY;
 
 
 if (!apiKey) {

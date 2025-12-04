@@ -17,10 +17,17 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
       }}>
       <Tabs.Screen
-        name="tour"
+        name="index"
         options={{
           title: 'Tour',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="road.lanes.curved.left" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: 'Explore',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="binoculars" color={color} />
         }}
       />
       <Tabs.Screen
@@ -35,6 +42,13 @@ export default function TabLayout() {
         options={{
           title: 'Settings',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="gearshape.2.fill" color={color} />
+        }}
+      />
+      <Tabs.Screen
+        name="login"
+        options={{
+          title: 'Login',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.circle" color={color} />
         }}
       />
     </Tabs>
