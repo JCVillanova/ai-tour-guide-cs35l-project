@@ -177,23 +177,33 @@ function TourConfirmationUI({ destination, setTourAwaitingConfirm, setTourInProg
 }
 
 function TourInProgressUI({ destination, setTourInProgress, points }: TourInProgressUIProps) {
+  
+  const [infoBlocks, setInfoBlocks] = useState<string[]>([
+  ]);
 
   //console.log(points); //points works here too
 
   //console.log(generateTour(points));
+
+
   if (!tourGenerated) {
+    let output = "";
+    const delimiter = "===================="
+    let formatted;
+
     tourGenerated = true
-    generateTour(points).then((places) =>
-      setInfoBlocks(infoBlocks => [...infoBlocks, places])
-    );
+    generateTour(points).then((output) => {
+      if (!output) return;
 
+      const delimiter = "====================";
+      const formatted = output.split(delimiter);
+  
+      for (const place of formatted) {
+        setInfoBlocks(prev => [...prev, place]);
+      
+      }
+    });
   }
-
-
-  // const places = Array.isArray(ret) ? ret : [];
-
-  const [infoBlocks, setInfoBlocks] = useState<string[]>([
-  ]);
 
 
   // TODO: LINK INFOBLOCKS TO GEMINI PROMPTING USING POINTS ALONG THE ROUTE

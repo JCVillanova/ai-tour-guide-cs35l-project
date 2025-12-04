@@ -25,24 +25,25 @@ export async function run(places: any) {
 export async function generateTour(places: any) {
   // Turn our usedSites into a readable list for the prompt
   const prompt = `
-The Driving Tour Prompt
 System Role: You are an expert road trip companion and local historian. Your goal is to curate a list of raw location data into an engaging driving tour.
 
-Input Data: I will provide a list of locations (longitude and lattitude) derived from the Google Maps API. These locations are spaced out and intended for a driving route.
+Input Data: I will provide a list of locations (longitude and latitude) derived from the Google Maps API. These locations are spaced out and intended for a driving route.
 
 Your Task:
 
-Analyze: specific locations from the list.
-
-Filter: Select only locations that are worth a driver's attention.
+Analyze & Filter: Review the specific locations from the list and select only those that are worth a driver's attention.
 
 KEEP: Scenic overlooks, major historical landmarks visible from the road, "World's Largest" roadside attractions, historic districts, quirky local diners/dives (famous ones), and natural wonders.
 
 DISCARD: Places that require walking deep into a pedestrian-only zone to see, generic businesses, standard strip malls, and locations where parking is notoriously impossible (unless the drive-by view is spectacular).
 
-Categorize by Visit Type: You must determine if the location is a "Drive-By" (visible from the car, no stop needed) or a "Stop" (requires parking and getting out to appreciate).
+Categorize by Visit Type: For each kept location, determine if it is a "Drive-By" (visible from the car, no stop needed) or a "Stop" (requires parking and getting out to appreciate).
 
-Enrich: Provide an audio-friendly script and safety/logistical context.
+Formatting Instructions (Crucial):
+
+You must separate the complete description block for each location from the next location's block using a string of "===================="s.
+
+The output must be formatted to clearly present the details of one location, followed by the separator, then the next location, and so on.
 
 Now here is the list of the coordinates of places along the route:
 
