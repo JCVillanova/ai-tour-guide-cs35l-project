@@ -57,7 +57,7 @@ function EnterLogonInfo({ email, setEmail, password, setPassword, setInSignUp, o
         }}
       >
         <ThemedButton onPress={onSubmit} content="Login"></ThemedButton>
-        <ThemedButton content="Sign Up" onPress={() => setInSignUp(true)} ></ThemedButton>
+        <ThemedButton content="Sign Up" onPress={() => (setInSignUp(true), setEmail(''), setPassword(''))} ></ThemedButton>
       </ThemedView>
     </ThemedView>
   );
@@ -113,7 +113,7 @@ function EnterSignUpInfo({ email, setEmail, password, setPassword, setInSignUp, 
         }}
       >
         <ThemedButton onPress={() => createAccountClick()} content="Create Account"></ThemedButton>
-        <ThemedButton onPress={() => setInSignUp(false)} content="Back to Login"></ThemedButton>
+        <ThemedButton onPress={() => (setInSignUp(false), setEmail(''), setPassword(''))} content="Back to Login"></ThemedButton>
       </ThemedView>
     </ThemedView>
   );
