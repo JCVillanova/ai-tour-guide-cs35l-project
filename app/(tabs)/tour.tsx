@@ -277,7 +277,19 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
         
         console.log("Points generated:", points.length);
         setRouteCoordinates(points);
-        endPoint = routeCoordinates[routeCoordinates.length - 1]
+        endPoint = routeCoordinates[routeCoordinates.length - 1];
+
+        if (mapRef.current) {
+          mapRef.current.fitToCoordinates(points, {
+            edgePadding: { 
+              top: 75, 
+              right: 75, 
+              bottom: 75,
+              left: 75,
+            },
+            animated: true,
+          });
+        }
       }
     } catch (error) {
       console.error(error);
