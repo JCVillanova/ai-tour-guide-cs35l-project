@@ -31,6 +31,7 @@ function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
   );
 }
 
+let points;
 // Props for different states of MapIntegratedScreen bottom half
 interface SearchUIProps {
   onHandleState: () => void;
@@ -48,6 +49,7 @@ interface TourConfirmationUIProps {
 interface TourInProgressUIProps {
   destination: string;
   setTourInProgress: (val: boolean) => void;
+  points:  Map<Map<string, number>, Map<string, number>>;
 }
 
 function SearchUI({ onHandleState, handleTextChange, searchResults }: SearchUIProps) {
@@ -171,7 +173,10 @@ function TourConfirmationUI({ destination, setTourAwaitingConfirm, setTourInProg
   );
 }
 
-function TourInProgressUI({ destination, setTourInProgress }: TourInProgressUIProps) {
+function TourInProgressUI({ destination, setTourInProgress, points }: TourInProgressUIProps) {
+
+  
+
   const [infoBlocks, setInfoBlocks] = useState<string[]>([
     "Your",
     "mom",
@@ -272,10 +277,12 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
         
         // You must decode this string into an array of {latitude, longitude}
         const decodedPoints = polyline.decode(encodedPolyline);
-        const points = decodedPoints.map((point) => ({
+        points = decodedPoints.map((point) => ({
           latitude: point[0],
           longitude: point[1]
         }));
+
+        //console.log(points);
         
         console.log("Points generated:", points.length);
         setRouteCoordinates(points);
@@ -312,12 +319,6 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
     if (status !== 'granted') return;
 
     setTourInterfaceOn(true);
-
-
-    // let geminiPrompt = await run();
-    // setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
-
-
 
     watchRef.current = await Location.watchPositionAsync(
       {
@@ -493,6 +494,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
       <TourInProgressUI 
         destination={destination}
         setTourInProgress={setTourInProgress}
+        points={points}
       /> : 
       <TourConfirmationUI 
         destination={destination}
