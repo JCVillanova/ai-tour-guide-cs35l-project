@@ -8,7 +8,6 @@ import { ThemedButton } from '@/components/ui/themed-button';
 import { Fonts } from '@/constants/theme';
 import { checkApiKey, searchQuery } from '@/scripts/google-maps-util';
 
-import { GOOGLE_MAPS_API_KEY } from '@env';
 import polyline from '@mapbox/polyline';
 import * as Location from 'expo-location';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -32,6 +31,186 @@ function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
   );
 }
 
+// Props for different states of MapIntegratedScreen bottom half
+interface SearchUIProps {
+  onHandleState: () => void;
+  handleTextChange: (text: string) => void;
+  searchResults: ReactNode | null;
+}
+
+interface TourConfirmationUIProps {
+  destination: string;
+  setTourAwaitingConfirm: (val: boolean) => void;
+  setTourInProgress: (val: boolean) => void;
+}
+
+interface TourInProgressUIProps {
+  destination: string;
+  setTourInProgress: (val: boolean) => void;
+}
+
+function SearchUI({ onHandleState, handleTextChange, searchResults }: SearchUIProps) {
+  return (
+    <ThemedView
+      style={{
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        minHeight: 400,
+        padding: 16,
+      }}
+    >
+      <ThemedView
+        style={{
+            flexDirection: 'column',
+            flexGrow: 1,
+            gap: 16,
+          }}
+      >
+        <ThemedText
+          type="title"
+          style={{
+            fontFamily: Fonts.rounded,
+          }}>
+          Plan Tour
+        </ThemedText>
+        <ThemedTextInput
+          onChangeText={handleTextChange}
+          placeholder='Search for a place anywhere'
+        />
+        <ThemedView
+          style={{
+            borderColor: 'white',
+            borderRadius: 4,
+            borderWidth: 0.5,
+            height: 192,
+          }}
+        >
+          <ThemedText
+            type='default'
+            style={{
+              margin: 'auto',
+            }}
+          >{searchResults}</ThemedText>
+        </ThemedView>
+        <ThemedButton
+          onPress={onHandleState}
+          content='Exit'
+          size='medium'
+          style={{}}
+        />
+      </ThemedView>
+    </ThemedView>
+  );
+}
+
+function TourConfirmationUI({ destination, setTourAwaitingConfirm, setTourInProgress }: TourConfirmationUIProps) {
+  return (
+    <ThemedView
+      style={{
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        minHeight: 400,
+        padding: 16,
+      }}
+    >
+      <ThemedView
+        style={{
+            flexDirection: 'column',
+            flexGrow: 1,
+            gap: 16,
+          }}
+      >
+        <ThemedText
+          type="title"
+          style={{
+            fontFamily: Fonts.rounded,
+          }}>
+          Confirm Tour
+        </ThemedText>
+        <ThemedView
+          style={{
+            alignItems: 'center',
+            flex: 1,
+            height: 192,
+            justifyContent: 'center',
+          }}
+        >
+          <ThemedText
+            style={{
+              fontSize: 30,
+              lineHeight: 30,
+              textAlign: 'center',
+            }}
+          >
+            Your tour will take you to {destination}
+          </ThemedText>
+        </ThemedView>
+        <ThemedView
+          style={{
+            flexDirection: 'row',
+            gap: 24,
+            justifyContent: 'center',
+          }}
+        >
+          <ThemedButton
+            onPress={() => (setTourAwaitingConfirm(false))}
+            content='Back'
+            size='medium'
+            style={{}}
+          />
+          <ThemedButton
+            onPress={() => (setTourInProgress(true))}
+            content='Start Tour'
+            size='medium'
+            style={{}}
+          />
+        </ThemedView>
+      </ThemedView>
+    </ThemedView>
+  );
+}
+
+function TourInProgressUI({ destination, setTourInProgress }: TourInProgressUIProps) {
+  const [infoBlocks, setInfoBlocks] = useState<string[]>([
+    "Your",
+    "mom",
+    "is",
+    "cool"
+  ]);
+
+  return (
+    <ThemedView style={{
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      minHeight: 400,
+      padding: 16,
+    }}>
+      <ThemedText type='subtitle'
+        style={{
+          fontFamily: Fonts.rounded,
+        }}
+      >En route to {destination}</ThemedText>
+      <ScrollView
+        style={styles.infoScroll}
+        contentContainerStyle={styles.infoScrollContent}
+      >
+        {infoBlocks.map((block, index) => (
+          <ThemedView key={index} style={styles.infoBlock}>
+            <ThemedText style={styles.infoBullet}>{'\u2022'}</ThemedText>
+            <ThemedText style={styles.infoText}>{block}</ThemedText>
+          </ThemedView>
+        ))}
+      </ScrollView>
+      <ThemedButton
+        onPress={() => (setTourInProgress(false))}
+        content='Exit'
+        size='medium'
+        style={{}}
+      />
+    </ThemedView>
+  );
+}
+
 function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState<ReactNode | null>(null);
@@ -42,6 +221,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
 
   const [routeCoordinates, setRouteCoordinates] = useState<Array<{latitude: number, longitude: number}>>([]);
   const [destination, setDestination] = useState('');
+  const [mapCentered, setMapCentered] = useState(false);
 
   useEffect(() => {
     startTourInterface();
@@ -136,15 +316,18 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
   
           setCurrentCoords({ latitude, longitude });
   
-          mapRef.current?.animateCamera(
-            {
-              center: { latitude, longitude },
-              zoom: 16,
-              heading: 0,
-              pitch: 0,
-            },
-            { duration: 500 }
-          );
+          if (!mapCentered) {
+            mapRef.current?.animateCamera(
+              {
+                center: { latitude, longitude },
+                zoom: 16,
+                heading: 0,
+                pitch: 0,
+              },
+              { duration: 500 }
+            );
+            setMapCentered(true);
+          }
         }
       );
     };
@@ -248,168 +431,6 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
 
   let endPoint = routeCoordinates[routeCoordinates.length - 1];
 
-  function SearchUI() {
-    return (
-      <ThemedView
-        style={{
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          minHeight: 400,
-          padding: 16,
-        }}
-      >
-        <ThemedView
-          style={{
-              flexDirection: 'column',
-              flexGrow: 1,
-              gap: 16,
-            }}
-        >
-          <ThemedText
-            type="title"
-            style={{
-              fontFamily: Fonts.rounded,
-            }}>
-            Plan Tour
-          </ThemedText>
-          <ThemedTextInput
-            onChangeText={handleTextChange}
-            placeholder='Search for a place anywhere'
-          />
-          <ThemedView
-            style={{
-              borderColor: 'white',
-              borderRadius: 4,
-              borderWidth: 0.5,
-              height: 192,
-            }}
-          >
-            <ThemedText
-              type='default'
-              style={{
-                margin: 'auto',
-              }}
-            >{searchResults}</ThemedText>
-          </ThemedView>
-          <ThemedButton
-            onPress={onHandleState}
-            content='Exit'
-            size='medium'
-            style={{}}
-          />
-        </ThemedView>
-      </ThemedView>
-    );
-  }
-
-  function TourConfirmationUI() {
-    return (
-      <ThemedView
-        style={{
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          minHeight: 400,
-          padding: 16,
-        }}
-      >
-        <ThemedView
-          style={{
-              flexDirection: 'column',
-              flexGrow: 1,
-              gap: 16,
-            }}
-        >
-          <ThemedText
-            type="title"
-            style={{
-              fontFamily: Fonts.rounded,
-            }}>
-            Confirm Tour
-          </ThemedText>
-          <ThemedView
-            style={{
-              alignItems: 'center',
-              flex: 1,
-              height: 192,
-              justifyContent: 'center',
-            }}
-          >
-            <ThemedText
-              style={{
-                fontSize: 30,
-                lineHeight: 30,
-                textAlign: 'center',
-              }}
-            >
-              Your tour will take you to {destination}
-            </ThemedText>
-          </ThemedView>
-          <ThemedView
-            style={{
-              flexDirection: 'row',
-              gap: 24,
-              justifyContent: 'center',
-            }}
-          >
-            <ThemedButton
-              onPress={() => (setTourAwaitingConfirm(false))}
-              content='Back'
-              size='medium'
-              style={{}}
-            />
-            <ThemedButton
-              onPress={() => (setTourInProgress(true))}
-              content='Start Tour'
-              size='medium'
-              style={{}}
-            />
-          </ThemedView>
-        </ThemedView>
-      </ThemedView>
-    );
-  }
-
-  function TourInProgressUI() {
-    const [infoBlocks, setInfoBlocks] = useState<string[]>([
-      "Your",
-      "mom",
-      "is",
-      "cool"
-    ]);
-
-    return (
-      <ThemedView style={{
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        minHeight: 400,
-        padding: 16,
-      }}>
-        <ThemedText type='subtitle'
-          style={{
-            fontFamily: Fonts.rounded,
-          }}
-        >En route to {destination}</ThemedText>
-        <ScrollView
-          style={styles.infoScroll}
-          contentContainerStyle={styles.infoScrollContent}
-        >
-          {infoBlocks.map((block, index) => (
-            <ThemedView key={index} style={styles.infoBlock}>
-              <ThemedText style={styles.infoBullet}>{'\u2022'}</ThemedText>
-              <ThemedText style={styles.infoText}>{block}</ThemedText>
-            </ThemedView>
-          ))}
-        </ScrollView>
-        <ThemedButton
-          onPress={() => (setTourInProgress(false))}
-          content='Exit'
-          size='medium'
-          style={{}}
-        />
-      </ThemedView>
-    );
-  }
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -456,7 +477,21 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
               />
             </MapView>
       </ThemedView>
-      {tourAwaitingConfirm ? (tourInProgress ? <TourInProgressUI /> : <TourConfirmationUI />) : <SearchUI />}
+      {tourAwaitingConfirm ? (tourInProgress ? 
+      <TourInProgressUI 
+        destination={destination}
+        setTourInProgress={setTourInProgress}
+      /> : 
+      <TourConfirmationUI 
+        destination={destination}
+        setTourAwaitingConfirm={setTourAwaitingConfirm}
+        setTourInProgress={setTourInProgress}
+      />) : 
+      <SearchUI
+        onHandleState={onHandleState}
+        handleTextChange={handleTextChange}
+        searchResults={searchResults}
+      />}
     </KeyboardAvoidingView>
   );
 }
