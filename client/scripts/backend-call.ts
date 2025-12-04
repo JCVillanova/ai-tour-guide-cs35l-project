@@ -96,6 +96,24 @@ async function getUserHistory(email: string): Promise<string[]> {
   return data.history;
 }
 
+async function getTourNarration(places: string): Promise<string> {
+  const response = await fetch(`${SERVER_URL}/tour-narration`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ places }),
+  });
+
+  if (!response.ok) {
+    console.error("Failed to generate tour narration");
+    return "";
+  }
+
+  const data = await response.json();
+  return data.narration;
+}
+
 export {
   createAccount,
   getLocationInfoByName,
@@ -104,4 +122,5 @@ export {
   getUserHistory,
   handleLogin,
   logUserActivity,
+  getTourNarration,
 };

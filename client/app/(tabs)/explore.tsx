@@ -3,7 +3,8 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Collapsible } from "@/components/ui/collapsible";
 import { Fonts } from "@/constants/theme";
-import { run } from "@/scripts/geminiprompttest";
+import { getTourNarration } from "@/scripts/backend-call";
+// import { run } from "@/scripts/geminiprompttest";
 // import {
 //   getLocationInfoByName,
 //   getLocationInfoCoords,
@@ -81,7 +82,7 @@ export default function TourScreen() {
         placesText = "No nearby places found.";
       }
 
-      const geminiPrompt = await run(placesText);
+      const geminiPrompt = await getTourNarration(placesText);
       setInfoBlocks((infoBlocks) => [...infoBlocks, geminiPrompt]);
     }
   };

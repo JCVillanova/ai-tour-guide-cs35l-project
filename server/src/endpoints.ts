@@ -167,19 +167,18 @@ router.get("/locations-nearby", async (req: Request, res: Response) => {
 
 router.post("/tour-narration", async (req: Request, res: Response) => {
   try {
-    const { places } = req.body;
+    const { placesText } = req.body;
 
-    if (!places) {
-      return res.status(400).json({ message: "Places array is required" });
+    if (!placesText || typeof placesText !== "string") {
+      return res.status(400).json({ message: "placesText string is required" });
     }
 
-    if (!Array.isArray(places) || places.length === 0) {
+    if (placesText.trim().length === 0) {
       return res
         .status(400)
-        .json({ message: "Places must be a non-empty array" });
+        .json({ message: "placesText must be a non-empty string" });
     }
 
-    const placesText = places.join("\n");
     const narration = await run(placesText);
 
     if (!narration) {
