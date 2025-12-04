@@ -1,5 +1,7 @@
+const SERVER_URL = process.env.SERVER_URL || "http://localhost:5000";
+
 async function handleLogin(email: string, password: string) {
-  const response = await fetch("https://your-backend-api.com/login", {
+  const response = await fetch(`${SERVER_URL}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -10,7 +12,7 @@ async function handleLogin(email: string, password: string) {
 }
 
 async function createAccount(email: string, password: string) {
-  const response = await fetch("https://your-backend-api.com/create-account", {
+  const response = await fetch(`${SERVER_URL}/create-account`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -25,7 +27,7 @@ async function getLocationInfoCoords(
   longitude: number
 ): Promise<string> {
   const response = await fetch(
-    "https://your-backend-api.com/location-info?lat=${latitude}&lon=${longitude}",
+    `${SERVER_URL}/location-info?lat=${latitude}&lon=${longitude}`,
     { method: "GET" }
   );
 
@@ -40,7 +42,7 @@ async function getLocationInfoCoords(
 
 async function getLocationInfoByName(locationName: string): Promise<string> {
   const response = await fetch(
-    "https://your-backend-api.com/location-info?name=${locationName}",
+    `${SERVER_URL}/location-info?name=${locationName}`,
     { method: "GET" }
   );
   if (!response.ok) {
@@ -55,10 +57,9 @@ async function getlocationsNearby(
   latitude: number,
   longitude: number
 ): Promise<string[]> {
-  const response = await fetch(
-    "https://your-backend-api.com/locations-nearby",
-    { method: "GET" }
-  );
+  const response = await fetch(`${SERVER_URL}/locations-nearby`, {
+    method: "GET",
+  });
   if (!response.ok) {
     console.error("Failed to fetch nearby locations");
     return [];
@@ -72,7 +73,7 @@ async function logUserActivity(
   location: string,
   information: string
 ): Promise<void> {
-  await fetch("https://your-backend-api.com/log-activity", {
+  await fetch(`${SERVER_URL}/log-activity`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -82,10 +83,9 @@ async function logUserActivity(
 }
 
 async function getUserHistory(email: string): Promise<string[]> {
-  const response = await fetch(
-    "https://your-backend-api.com/user-history?email=${email}",
-    { method: "GET" }
-  );
+  const response = await fetch(`${SERVER_URL}/user-history?email=${email}`, {
+    method: "GET",
+  });
 
   if (!response.ok) {
     console.error("Failed to fetch user history");

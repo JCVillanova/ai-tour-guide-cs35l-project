@@ -3,7 +3,6 @@ import { Request, Response } from "express";
 const router = express.Router();
 const User = require("../models/User"); // Mongoose model
 
-
 // async function storeUserData(req: any, res: any) {
 //   try {
 //     const { name, email } = req.body;
@@ -125,21 +124,27 @@ router.get("/users/:id/history", async (req: Request, res: Response) => {
   }
 });
 
-router.getLocationInfoByName, async(req: Request, res: Response) {
-  const locationName = req.query.name as string;
-  // Implement logic to fetch location info by name
-  res.json({ info: `Info for location: ${locationName}` });
-}
+router.getLocationInfoByName,
+  async (req: Request, res: Response) => {
+    const locationName = req.query.name as string;
+    // Implement logic to fetch location info by name
+    res.json({ info: `Info for location: ${locationName}` });
+  };
 
-router.getLocationsNearby, async(req: Request, res: Response) {
-  const latitude = parseFloat(req.query.latitude as string);
-  const longitude = parseFloat(req.query.longitude as string);
-  // Implement logic to fetch nearby locations based on latitude and longitude
-  res.json({ locations: [`Location1 near (${latitude}, ${longitude})`, `Location2 near (${latitude}, ${longitude})`] });
-}
+router.getLocationsNearby,
+  async (req: Request, res: Response) => {
+    const latitude = parseFloat(req.query.latitude as string);
+    const longitude = parseFloat(req.query.longitude as string);
+    // Implement logic to fetch nearby locations based on latitude and longitude
+    res.json({
+      locations: [
+        `Location1 near (${latitude}, ${longitude})`,
+        `Location2 near (${latitude}, ${longitude})`,
+      ],
+    });
+  };
 
-
-router.get("/")
+router.get("/");
 
 module.exports = router;
 
