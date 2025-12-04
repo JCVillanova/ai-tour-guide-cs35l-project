@@ -1,13 +1,18 @@
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { Fonts } from '@/constants/theme';
-import { run } from '@/scripts/geminiprompttest';
-import { GetPlacesInRadius } from '@/scripts/google-maps-util';
-import * as Location from 'expo-location';
-import * as Speech from 'expo-speech';
-import React, { useEffect, useRef, useState } from 'react';
+import ParallaxScrollView from "@/components/parallax-scroll-view";
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { Collapsible } from "@/components/ui/collapsible";
+import { Fonts } from "@/constants/theme";
+import { run } from "@/scripts/geminiprompttest";
+// import {
+//   getLocationInfoByName,
+//   getLocationInfoCoords,
+// } from "@/scripts/backend-call";
+
+import { GetPlacesInRadius } from "@/scripts/google-maps-util";
+import * as Location from "expo-location";
+import * as Speech from "expo-speech";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -15,14 +20,12 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
-import MapView, { Circle, PROVIDER_GOOGLE } from 'react-native-maps';
+} from "react-native";
+import MapView, { Circle, PROVIDER_GOOGLE } from "react-native-maps";
 
 export default function TourScreen() {
-
   const [tourOn, setTourOn] = useState(false);
-  const [infoBlocks, setInfoBlocks] = useState<string[]>([
-  ]);
+  const [infoBlocks, setInfoBlocks] = useState<string[]>([]);
 
   // current gps coords
   const [currentCoords, setCurrentCoords] = useState<{
@@ -32,17 +35,15 @@ export default function TourScreen() {
 
   // Range in meters for circle radius and prompt
   const [rangeMeters, setRangeMeters] = useState<number>(30);
-  const [rangeInput, setRangeInput] = useState<string>('30');
+  const [rangeInput, setRangeInput] = useState<string>("30");
 
   // prompt cooldown in seconds
   const [promptIntervalSec, setPromptIntervalSec] = useState<number>(30);
-  const [promptIntervalInput, setPromptIntervalInput] =
-    useState<string>('30');
+  const [promptIntervalInput, setPromptIntervalInput] = useState<string>("30");
 
   const mapRef = useRef<MapView | null>(null);
   const watchRef = useRef<Location.LocationSubscription | null>(null);
-  const promptTimerRef =
-    useRef<ReturnType<typeof setInterval> | null>(null);
+  const promptTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Stop GPS watcher and prompt timer when we leave the screen
   useEffect(() => {
@@ -60,7 +61,12 @@ export default function TourScreen() {
   const promptGemini = async () => {
     if (currentCoords) {
       // Await the places search so we pass meaningful text to the Gemini prompt
-      const places = await GetPlacesInRadius(currentCoords.latitude, currentCoords.longitude, rangeMeters, "AIzaSyCeVPoJrwSedLMPpMtiCfP7bagnRRwtD18");
+      const places = await GetPlacesInRadius(
+        currentCoords.latitude,
+        currentCoords.longitude,
+        rangeMeters,
+        "AIzaSyCeVPoJrwSedLMPpMtiCfP7bagnRRwtD18"
+      );
 
       // Convert results to readable text (name / vicinity / formatted_address)
       let placesText: string;
@@ -70,13 +76,13 @@ export default function TourScreen() {
             const name = p.name || p.vicinity || p.formatted_address;
             return `${i + 1}. ${name ?? JSON.stringify(p)}`;
           })
-          .join('\n');
+          .join("\n");
       } else {
-        placesText = 'No nearby places found.';
+        placesText = "No nearby places found.";
       }
 
       const geminiPrompt = await run(placesText);
-      setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
+      setInfoBlocks((infoBlocks) => [...infoBlocks, geminiPrompt]);
     }
   };
 
@@ -89,15 +95,12 @@ export default function TourScreen() {
 
   const startTour = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') return;
+    if (status !== "granted") return;
 
     setTourOn(true);
 
-
     // let geminiPrompt = await run();
     // setInfoBlocks(infoBlocks => [...infoBlocks, geminiPrompt]);
-
-
 
     watchRef.current = await Location.watchPositionAsync(
       {
@@ -133,7 +136,6 @@ export default function TourScreen() {
       clearInterval(promptTimerRef.current);
       promptTimerRef.current = null;
     }
-    
   };
 
   useEffect(() => {
@@ -154,8 +156,6 @@ export default function TourScreen() {
     // }, promptIntervalSec * 1000);
     const intervalGemini = setInterval(promptGemini, promptIntervalSec * 1000);
 
-    
-
     return () => {
       if (promptTimerRef.current) {
         clearInterval(promptTimerRef.current);
@@ -165,18 +165,18 @@ export default function TourScreen() {
     };
   }, [tourOn, promptIntervalSec]);
 
-//text to speech
-useEffect(() => {
-  if (infoBlocks.length === 0) return;
+  //text to speech
+  useEffect(() => {
+    if (infoBlocks.length === 0) return;
 
-  const latest = infoBlocks[infoBlocks.length - 1];
-  Speech.speak(latest);
-  return () =>{
+    const latest = infoBlocks[infoBlocks.length - 1];
+    Speech.speak(latest);
+    return () => {
       Speech.stop();
-  };
-}, [infoBlocks, tourOn]);
+    };
+  }, [infoBlocks, tourOn]);
 
-//input boxes
+  //input boxes
   const handleRangeChange = (text: string) => {
     setRangeInput(text);
     const value = parseFloat(text);
@@ -197,7 +197,7 @@ useEffect(() => {
     <View style={{ flex: 1 }}>
       {!tourOn ? (
         <ParallaxScrollView
-          headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+          headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
           headerImage={<></>}
           headerDisplay={false}
           style={{}}
@@ -242,7 +242,9 @@ useEffect(() => {
           {}
           <View style={styles.mapContainer}>
             <MapView
-              ref={(r) => {mapRef.current = r}}
+              ref={(r) => {
+                mapRef.current = r;
+              }}
               provider={PROVIDER_GOOGLE}
               style={StyleSheet.absoluteFill}
               mapType="standard"
@@ -307,7 +309,7 @@ useEffect(() => {
             >
               {infoBlocks.map((block, index) => (
                 <View key={index} style={styles.infoBlock}>
-                  <Text style={styles.infoBullet}>{'\u2022'}</Text>
+                  <Text style={styles.infoBullet}>{"\u2022"}</Text>
                   <Text style={styles.infoText}>{block}</Text>
                 </View>
               ))}
@@ -321,79 +323,79 @@ useEffect(() => {
 
 const styles = StyleSheet.create({
   titleContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   centerArea: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 32,
   },
   primaryBtn: {
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderRadius: 12,
-    backgroundColor: '#1a73e8',
+    backgroundColor: "#1a73e8",
   },
   primaryBtnText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
     fontSize: 16,
   },
   tourContainer: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: "#000",
   },
   mapContainer: {
     flex: 1,
-    position: 'relative',
+    position: "relative",
   },
   controlsContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: '#111',
+    backgroundColor: "#111",
     borderTopWidth: 1,
-    borderTopColor: '#333',
+    borderTopColor: "#333",
     gap: 12,
   },
   controlGroup: {
     flex: 1,
   },
   controlLabel: {
-    color: '#ccc',
+    color: "#ccc",
     fontSize: 12,
     marginBottom: 4,
   },
   controlInput: {
-    backgroundColor: '#222',
+    backgroundColor: "#222",
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
     borderWidth: 1,
-    borderColor: '#444',
+    borderColor: "#444",
   },
 
   infoContainer: {
     flex: 1, // bottom half
-    backgroundColor: '#101010',
+    backgroundColor: "#101010",
     borderTopWidth: 1,
-    borderTopColor: '#333',
+    borderTopColor: "#333",
   },
   endBtn: {
-    position: 'absolute',
+    position: "absolute",
     top: 50,
     right: 20,
-    backgroundColor: '#ff0000ff',
+    backgroundColor: "#ff0000ff",
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 12,
   },
   endBtnText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
   },
 
   infoScroll: {
@@ -405,21 +407,21 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   infoBlock: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     padding: 12,
     borderRadius: 10,
-    backgroundColor: '#1e1e1e',
+    backgroundColor: "#1e1e1e",
   },
   infoBullet: {
     marginRight: 8,
     marginTop: 2,
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 16,
   },
   infoText: {
     flex: 1,
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 14,
   },
 });
