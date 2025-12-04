@@ -339,37 +339,11 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
     };
 
   async function handleSearch(text: string) {
-    /*
-    TODO: IMPLEMENT SEARCH FUNCTIONALITY
-    Map is a string to number key-value system. The number should be changed to whatever data type actually accesses the queried location (that way a user
-    can tap the search result showing the string key and the app can then access the actual place)
-    */
-
+    // Search for results
     const ret = await searchQuery(text)
-
+    const places = ret || [];
     const resultsArray: string[] = [];
-    
-
-    ret.forEach(place => {
-      //printing out to debug
-      //   console.log(
-      //   "Name:", place.displayName.text,
-      //   "\nAddress:", place.formattedAddress,
-      //   "\n--------- ---------------"
-      // );
-
-      resultsArray.push("Name: " + place.displayName.text + "\nAddress: " + place.formattedAddress);
-
-      console.log(resultsArray[0]);   
-    }
-    );
-
-    
-   
-
-
-
-    // let results = new Map<string, number>();
+    places.forEach(place => { resultsArray.push("Name: " + place.displayName.text + "\nAddress: " + place.formattedAddress) });
 
     // // // TODO: POPULATE results WITH SEARCH RESULTS FROM MAPS API
     // const resultsArray: string[] = [...results.keys()];
