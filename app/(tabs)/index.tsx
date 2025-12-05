@@ -266,11 +266,6 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
   setTourInProgress(false);
 };
 
-    cancelRef.current = true;
-    Speech.stop();
-    tourGenerated = false;
-    setTourInProgress(false);
-  };
 
 
   return (
