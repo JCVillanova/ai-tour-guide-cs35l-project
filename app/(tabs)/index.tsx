@@ -258,7 +258,6 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
       >
         {infoBlocks.map((block, index) => (
           <ThemedView key={index} style={styles.infoBlock}>
-            <ThemedText style={styles.infoBullet}>{'\u2022'}</ThemedText>
             <ThemedText style={styles.infoText}>{block}</ThemedText>
           </ThemedView>
         ))}
@@ -609,11 +608,11 @@ const styles = StyleSheet.create({
     height: 0,
   },
   infoBlock: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
     padding: 12,
-    borderRadius: 10,
-    backgroundColor: '#1e1e1e',
+    borderColor: 'white',
+    borderRadius: 12,
+    borderWidth: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
   infoBullet: {
     marginRight: 8,
@@ -623,16 +622,16 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     flex: 1, // bottom half
-    backgroundColor: '#101010',
+    backgroundColor: 'transparent',
     borderTopWidth: 1,
     borderTopColor: '#333',
   },
   infoScroll: {
+    borderRadius: 12,
     flex: 1,
+    marginBottom: 16,
   },
   infoScrollContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
     gap: 12,
   },
   infoText: {

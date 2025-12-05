@@ -1,6 +1,7 @@
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ThemedButton } from '@/components/ui/themed-button';
 import { Fonts } from '@/constants/theme';
 import { clearSites, run, warmGemini } from '@/scripts/geminiprompttest';
 import { GetPlacesInRadius } from '@/scripts/google-maps-util';
@@ -258,9 +259,12 @@ export default function TourScreen() {
               Explore
             </ThemedText>
 
-            <Pressable style={styles.primaryBtn} onPress={startTour}>
-              <Text style={styles.primaryBtnText}>Start Tour</Text>
-            </Pressable>
+            <ThemedButton
+              onPress={startTour}
+              content='Start Tour'
+              size='large'
+              style={{}}
+            />
           </ThemedView>
         </ParallaxScrollView>
       ) : (
@@ -331,7 +335,6 @@ export default function TourScreen() {
             >
               {infoBlocks.map((block, index) => (
                 <View key={index} style={styles.infoBlock}>
-                  <Text style={styles.infoBullet}>{'\u2022'}</Text>
                   <Text style={styles.infoText}>{block}</Text>
                 </View>
               ))}
@@ -406,12 +409,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#444',
   },
-  infoContainer: {
-    flex: 1, // bottom half
-    backgroundColor: '#101010',
-    borderTopWidth: 1,
-    borderTopColor: '#333',
-  },
   endBtn: {
     position: 'absolute',
     top: 50,
@@ -425,26 +422,31 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
-  infoScroll: {
-    flex: 1,
-  },
-  infoScrollContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
-  },
   infoBlock: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
     padding: 12,
-    borderRadius: 10,
-    backgroundColor: '#1e1e1e',
+    borderColor: 'white',
+    borderRadius: 12,
+    borderWidth: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
   infoBullet: {
     marginRight: 8,
     marginTop: 2,
     color: '#ffffff',
     fontSize: 16,
+  },
+  infoContainer: {
+    flex: 1, // bottom half
+    backgroundColor: 'transparent',
+    borderTopWidth: 1,
+    borderTopColor: '#333',
+  },
+  infoScroll: {
+    flex: 1,
+    paddingHorizontal: 12,
+  },
+  infoScrollContent: {
+    gap: 12,
   },
   infoText: {
     flex: 1,
