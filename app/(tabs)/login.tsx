@@ -10,6 +10,9 @@ import { useState } from "react";
 import { Alert, StyleSheet } from "react-native";
 import { useAuth } from "../auth_context";
 
+// NOTE - AI was used throughout this file in order to edit the already existing code
+// to properly validate user input and handle giving alert errors.
+
 interface AuthFormProps {
   email: string;
   setEmail: (text: string) => void;
@@ -210,10 +213,7 @@ function LoginPage() {
 
       if (response.error) {
         Alert.alert("Login Failed", response.error);
-      } else if (
-        response.message &&
-        response.message.includes("successfully")
-      ) {
+      } else if (response.message && response.message.includes("successful")) {
         await login(email);
         console.log("Logged in successfully as", email);
         await AsyncStorage.setItem("userEmail", email);
