@@ -1,4 +1,3 @@
-import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedTextInput } from '@/components/themed-text-input';
 import { ThemedView } from '@/components/themed-view';
@@ -10,6 +9,7 @@ import * as Location from 'expo-location';
 import * as Speech from 'expo-speech';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  ImageBackground,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -17,6 +17,8 @@ import {
   View
 } from 'react-native';
 import MapView, { Circle, PROVIDER_GOOGLE } from 'react-native-maps';
+
+import Explore from '../../assets/images/explore.png';
 
 export default function TourScreen() {
   const [tourOn, setTourOn] = useState(false);
@@ -260,25 +262,21 @@ export default function TourScreen() {
   return (
     <ThemedView style={{ flex: 1 }}>
       {!tourOn ? (
-        <ParallaxScrollView
-          headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-          headerImage={<></>}
-          headerDisplay={false}
-          style={{}}
+        <ImageBackground
+          source={Explore}
+          style={{
+            flex: 1,
+          }}
         >
           <ThemedView style={styles.exploreContainer}>
-            <ThemedText type="title" style={styles.exploreTitle}>
-              Explore
-            </ThemedText>
-
             <ThemedButton
               onPress={startTour}
-              content='Start Tour'
+              content='Start Exploring'
               size='large'
               style={{}}
             />
           </ThemedView>
-        </ParallaxScrollView>
+        </ImageBackground>
       ) : (
         <ThemedView style={styles.tourContainer}>
           <ThemedView style={styles.mapContainer}>
@@ -360,10 +358,10 @@ export default function TourScreen() {
 
 const styles = StyleSheet.create({
   exploreContainer: {
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 64,
   },
   exploreTitle: {
     fontFamily: Fonts.rounded,

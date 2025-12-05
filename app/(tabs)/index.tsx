@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { FlatList, Image, ImageBackground, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedTextInput } from '@/components/themed-text-input';
@@ -13,6 +13,8 @@ import polyline from '@mapbox/polyline';
 import * as Location from 'expo-location';
 import * as Speech from 'expo-speech';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+
+import Tour from '../../assets/images/tour.png';
 
 let tourGenerated = false;
 
@@ -41,20 +43,27 @@ interface TourInProgressUIProps {
 
 function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
   return (
-    <ThemedView
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
+    <ImageBackground
+      imageStyle={styles.imageOffset}
+      source={Tour}
+      style={{ flex: 1 }}
     >
-      <ThemedButton
-        onPress={onHandleState}
-        content='Plan Tour'
-        size='large'
-        style={{}}
-      />
-    </ThemedView>
+      <ThemedView
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.65)',
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <ThemedButton
+          onPress={onHandleState}
+          content='Plan Tour'
+          size='large'
+          style={{}}
+        />
+      </ThemedView>
+    </ImageBackground>
   );
 }
 
@@ -630,6 +639,10 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     borderWidth: 0.5,
     height: 0,
+  },
+  imageOffset: {
+    marginLeft: -9,
+    width: '110%',
   },
   infoBlock: {
     padding: 12,
