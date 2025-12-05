@@ -183,6 +183,7 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
 
   const [infoBlocks, setInfoBlocks] = useState<string[]>([]);
   const [hasStartedTTS, setHasStartedTTS] = useState(false);
+  const cancelRef = useRef(false);
 
   // Generate the tour text once per tour
   if (!tourGenerated) {
@@ -199,7 +200,7 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
 
   //tts loop
   function speakBlock(index: number) {
-    if (index >= infoBlocks.length) {
+    if (cancelRef.current || index >= infoBlocks.length) {
       return;
     }
 
@@ -207,8 +208,11 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
 
     Speech.speak(text, {
       onDone: () => {
+        if (cancelRef.current) {
+          return;
+        }
         speakBlock(index + 1);
-      },onStopped: () => {},onError: () => {},});
+      },onStopped: () => {return;},onError: () => {return;},});
   }
 
   // Start tts when first get infoblocks
@@ -222,12 +226,14 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
   // Cleanup functions for tts
   useEffect(() => {
     return () => {
+      cancelRef.current = true;
       Speech.stop();
       tourGenerated = false;
     };
   }, []);
 
   const handleExit = () => {
+    cancelRef.current = true;
     Speech.stop();
     tourGenerated = false;
     setTourInProgress(false);
