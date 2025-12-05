@@ -4,9 +4,13 @@ import { ScrollView, StyleSheet } from 'react-native';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ThemedButton } from '@/components/ui/themed-button';
 import { Collapsible } from '@/components/ui/collapsible';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
+
+import { useRouter } from 'expo-router';
+import { useAuth } from '../auth_context';
 
 function splitGeminiOutput(geminiOutput: string): string[] {
   const delimiter = "====================";
@@ -71,6 +75,8 @@ function SavedTour({
 
 export default function HistoryScreen() {
   // TODO: REPLACE DUMMY CONTENT WITH ACTUAL TOUR HISTORY LINKED TO GIVEN ACCOUNT
+  const { userName } = useAuth();
+  const router = useRouter();
 
   const [historyBlocks, setHistoryBlocks] = useState<TourRecord[]>([
     {
@@ -87,6 +93,40 @@ export default function HistoryScreen() {
     },
     
   ]);
+
+  if (!userName) {
+    return (
+      <ParallaxScrollView
+        headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+        headerImage={
+          <IconSymbol
+            size={310}
+            color="#808080"
+            name="lock.fill" // changed icon to lock
+            style={styles.headerImage}
+          />
+        }
+        headerDisplay={false}
+        style={{}}
+      >
+        <ThemedView style={styles.titleContainer}>
+          <ThemedText type="title" style={{ fontFamily: Fonts.rounded }}>
+            History
+          </ThemedText>
+        </ThemedView>
+        
+        <ThemedView style={{ gap: 20, marginTop: 16, alignItems: 'center' }}>
+          <ThemedText type="subtitle" style={{textAlign: 'center'}}>
+            Please log in to view your tour history.
+          </ThemedText>
+          <ThemedButton 
+            content="Go to Login" 
+            onPress={() => router.navigate('/login')} 
+          />
+        </ThemedView>
+      </ParallaxScrollView>
+    );
+  }
 
   return (
     <ParallaxScrollView

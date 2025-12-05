@@ -8,6 +8,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet } from 'react-native';
 import { createAccount, handleLogin } from "../../scripts/backend-call";
+import { useAuth } from "../auth_context";
 
 interface AuthFormProps {
   email: string;
@@ -125,14 +126,27 @@ function LoginPage() {
   const [inSignUp, setInSignUp] = useState(false);
   const router = useRouter();
 
+  const { login, userName } = useAuth();
+
   const handleLoginClick = async () => {
     try {
       const response = await handleLogin(email, password);
+      await login(email); 
+      console.log("Logged in successfully as", email);
     } catch (error) {
       console.error("Login failed:", error);
     }
-    AsyncStorage.setItem("userEmail", email);
   };
+
+  if (userName) {
+    const { logout } = useAuth();
+    return (
+      <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ThemedText>Hello, {userName}!</ThemedText>
+        <ThemedButton content="Logout" onPress={logout} />
+      </ThemedView>
+    )
+  }
 
   return (
     <ThemedView
