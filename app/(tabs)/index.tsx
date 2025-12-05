@@ -8,6 +8,9 @@ import { ThemedButton } from '@/components/ui/themed-button';
 import { Fonts } from '@/constants/theme';
 import { generateTour } from '@/scripts/geminiprompttest';
 import { checkApiKey, searchQuery } from '@/scripts/google-maps-util';
+import { saveTourToHistory } from '@/scripts/history-storage';
+
+import { useAuth } from '../auth_context';
 
 import polyline from '@mapbox/polyline';
 import * as Location from 'expo-location';
@@ -189,8 +192,10 @@ function TourConfirmationUI({ destination, setTourAwaitingConfirm, setTourInProg
 }
 
 function TourInProgressUI({ destination, setTourInProgress, points }: TourInProgressUIProps) {
+  const { userName } = useAuth();
 
   const [infoBlocks, setInfoBlocks] = useState<string[]>([]);
+  const [rawOutput, setRawOutput] = useState('');
   const [hasStartedTTS, setHasStartedTTS] = useState(false);
   const cancelRef = useRef(false);
 
@@ -200,6 +205,7 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
     generateTour(points).then((output) => {
       if (!output) return;
 
+      setRawOutput(output);
       const delimiter = "====================";
       const formatted = output.split(delimiter).map(s => s.trim()).filter(Boolean);
 
@@ -241,7 +247,21 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
     };
   }, []);
 
-  const handleExit = () => {
+  const handleExit = async () => {
+    // Only save if a user is actually logged in
+    if (userName) {
+      const tourRecord = {
+        title: `Tour to ${destination}`,
+        startingPoint: "Current Location", // TODO: MAKE STARTING POINT AN ACTUAL LOCATION CLOSEST TO WHERE USER IS, NOT A STRING LITERAL
+        destination: destination,
+        geminiOutput: rawOutput,
+        date: new Date().toLocaleDateString(),
+      };
+
+      // Pass userName to the save function
+      await saveTourToHistory(userName, tourRecord);
+    }
+
     cancelRef.current = true;
     Speech.stop();
     tourGenerated = false;

@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
@@ -9,6 +10,8 @@ import { Collapsible } from '@/components/ui/collapsible';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
 
+import { getHistory, type TourRecord } from '@/scripts/history-storage';
+
 import { useRouter } from 'expo-router';
 import { useAuth } from '../auth_context';
 
@@ -17,26 +20,19 @@ function splitGeminiOutput(geminiOutput: string): string[] {
   return geminiOutput.split(delimiter).filter(text => text.trim().length > 0);
 }
 
-// Type needed to pass history info to respective history blocks
-type TourRecord = {
-  title: string;
-  startingPoint: string;
-  destination: string;
-  geminiOutput: string;
-};
-
 function SavedTour({
   title,
   startingPoint,
   destination,
   geminiOutput,
+  date,
 }: TourRecord) {
   const infoBlocks = useMemo(() => {
     return splitGeminiOutput(geminiOutput);
   }, [geminiOutput]);
 
   return (
-    <Collapsible title={title} large={true}>
+    <Collapsible title={title + ' ' + date} large={true}>
       <ThemedView style={styles.savedTourContent}>
         <ThemedText type='defaultSemiBold' style={styles.savedTourCategory}>
           Starting Point:
@@ -78,21 +74,21 @@ export default function HistoryScreen() {
   const { userName } = useAuth();
   const router = useRouter();
 
-  const [historyBlocks, setHistoryBlocks] = useState<TourRecord[]>([
-    {
-      title: "Golden Gate Bridge Tour",
-      startingPoint: "Pier 39, San Francisco",
-      destination: "Sausalito Viewpoint",
-      geminiOutput: "This tour features stunning views of the bay and Alcatraz...====================something something something something something something something something something something something something something something something"
-    },
-    {
-      title: "NYC Museum Hop",
-      startingPoint: "Metropolitan Museum of Art",
-      destination: "Museum of Modern Art (MoMA)",
-      geminiOutput: "Explore the art history of New York with an itinerary designed by AI..."
-    },
-    
-  ]);
+  const [historyBlocks, setHistoryBlocks] = useState<TourRecord[]>([]);
+
+  const fetchHistory = async () => {
+    // Pass the email to get only this user's data
+    if (userName) {
+      const data = await getHistory(userName);
+      setHistoryBlocks(data);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchHistory();
+    }, [userName]) // Re-run if userEmail changes
+  );
 
   if (!userName) {
     return (
@@ -163,6 +159,7 @@ export default function HistoryScreen() {
               startingPoint={block.startingPoint}
               destination={block.destination}
               geminiOutput={block.geminiOutput}
+              date={block.date}
             />
           </ThemedView>
         ))}
