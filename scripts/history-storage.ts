@@ -1,40 +1,61 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
+// src/scripts/history-storage.ts
+const SERVER_URL = "http://<YOUR-IP-OR-TUNNEL-URL>"; 
 export type TourRecord = {
   title: string;
   startingPoint: string;
   destination: string;
-  geminiOutput: string;
+  geminiOutput: string; // full Gemini output string
   date: string;
 };
 
-// Helper to generate a unique key for each user
-const getStorageKey = (email: string) => `tour_history_${email}`;
-
-// Save a new tour (requires email)
-export const saveTourToHistory = async (email: string, newTour: TourRecord) => {
-  if (!email) return; // Don't save if no user is logged in
-
+/**
+ * Save a single tour to the logged-in user's history.
+ * email = userName from useAuth() (your login email).
+ */
+export async function saveTourToHistory(
+  email: string,
+  record: TourRecord
+): Promise<void> {
   try {
-    const key = getStorageKey(email);
-    const existingHistory = await getHistory(email);
-    const updatedHistory = [newTour, ...existingHistory];
-    await AsyncStorage.setItem(key, JSON.stringify(updatedHistory));
-  } catch (error) {
-    console.error('Error saving tour:', error);
+    const response = await fetch(`${SERVER_URL}/user-history`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, record }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      console.error("Failed to save tour history:", response.status, text);
+    }
+  } catch (err) {
+    console.error("Error saving tour history:", err);
   }
-};
+}
 
-// Get all tours (requires email)
-export const getHistory = async (email: string): Promise<TourRecord[]> => {
-  if (!email) return [];
-
+/**
+ * Get all tours for a given user (by email).
+ * HistoryScreen already calls getHistory(userName).
+ */
+export async function getHistory(email: string): Promise<TourRecord[]> {
   try {
-    const key = getStorageKey(email);
-    const jsonValue = await AsyncStorage.getItem(key);
-    return jsonValue != null ? JSON.parse(jsonValue) : [];
-  } catch (error) {
-    console.error('Error reading history:', error);
+    const response = await fetch(
+      `${SERVER_URL}/user-history?email=${encodeURIComponent(email)}`,
+      { method: "GET" }
+    );
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      console.error("Failed to fetch user history:", response.status, text);
+      return [];
+    }
+
+    const data = await response.json();
+    // backend will respond with { history: [...] }
+    return Array.isArray(data.history) ? data.history : [];
+  } catch (err) {
+    console.error("Error fetching user history:", err);
     return [];
   }
-};
+}
