@@ -1,5 +1,6 @@
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
+import { ThemedTextInput } from '@/components/themed-text-input';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedButton } from '@/components/ui/themed-button';
 import { Fonts } from '@/constants/theme';
@@ -13,8 +14,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
-  View,
+  View
 } from 'react-native';
 import MapView, { Circle, PROVIDER_GOOGLE } from 'react-native-maps';
 
@@ -256,7 +256,7 @@ export default function TourScreen() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <ThemedView style={{ flex: 1 }}>
       {!tourOn ? (
         <ParallaxScrollView
           headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -278,8 +278,8 @@ export default function TourScreen() {
           </ThemedView>
         </ParallaxScrollView>
       ) : (
-        <View style={styles.tourContainer}>
-          <View style={styles.mapContainer}>
+        <ThemedView style={styles.tourContainer}>
+          <ThemedView style={styles.mapContainer}>
             <MapView
               ref={(r) => {
                 mapRef.current = r;
@@ -310,12 +310,12 @@ export default function TourScreen() {
             <Pressable style={styles.endBtn} onPress={endTour}>
               <Text style={styles.endBtnText}>End Tour</Text>
             </Pressable>
-          </View>
+          </ThemedView>
 
-          <View style={styles.controlsContainer}>
-            <View style={styles.controlGroup}>
-              <Text style={styles.controlLabel}>Range (meters):</Text>
-              <TextInput
+          <ThemedView style={styles.controlsContainer}>
+            <ThemedView style={styles.controlGroup}>
+              <ThemedText style={styles.controlLabel}>Range (meters):</ThemedText>
+              <ThemedTextInput
                 style={styles.controlInput}
                 keyboardType="numeric"
                 value={rangeInput}
@@ -323,11 +323,11 @@ export default function TourScreen() {
                 placeholder="e.g. 150"
                 placeholderTextColor="#888"
               />
-            </View>
+            </ThemedView>
 
-            <View style={styles.controlGroup}>
-              <Text style={styles.controlLabel}>Prompt time (seconds):</Text>
-              <TextInput
+            <ThemedView style={styles.controlGroup}>
+              <ThemedText style={styles.controlLabel}>Prompt time (seconds):</ThemedText>
+              <ThemedTextInput
                 style={styles.controlInput}
                 keyboardType="numeric"
                 value={promptIntervalInput}
@@ -335,10 +335,10 @@ export default function TourScreen() {
                 placeholder="e.g. 15"
                 placeholderTextColor="#888"
               />
-            </View>
-          </View>
+            </ThemedView>
+          </ThemedView>
 
-          <View style={styles.infoContainer}>
+          <ThemedView style={styles.infoContainer}>
             <ScrollView
               style={styles.infoScroll}
               contentContainerStyle={styles.infoScrollContent}
@@ -349,10 +349,10 @@ export default function TourScreen() {
                 </View>
               ))}
             </ScrollView>
-          </View>
-        </View>
+          </ThemedView>
+        </ThemedView>
       )}
-    </View>
+    </ThemedView>
   );
 }
 
@@ -386,7 +386,6 @@ const styles = StyleSheet.create({
   },
   tourContainer: {
     flex: 1,
-    backgroundColor: '#000',
   },
   mapContainer: {
     flex: 1,
@@ -396,7 +395,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: '#111',
     borderTopWidth: 1,
     borderTopColor: '#333',
     gap: 12,
@@ -407,7 +405,7 @@ const styles = StyleSheet.create({
   controlLabel: {
     color: '#ccc',
     fontSize: 12,
-    marginBottom: 4,
+    marginBottom: 0,
   },
   controlInput: {
     backgroundColor: '#222',
@@ -449,11 +447,11 @@ const styles = StyleSheet.create({
     flex: 1, // bottom half
     backgroundColor: 'transparent',
     borderTopWidth: 1,
-    borderTopColor: '#333',
+    borderTopColor: '#444',
   },
   infoScroll: {
     flex: 1,
-    paddingHorizontal: 12,
+    padding: 12,
   },
   infoScrollContent: {
     gap: 12,
