@@ -28,9 +28,6 @@ export function checkApiKey(): string {
   return key;
 }
 
-//const GOOGLE_PLACES_BASE = "https://places.googleapis.com/v1/places:searchText"; //text search
-
-
 
 export const searchQuery = async (query: string) => {
   try {
@@ -58,18 +55,11 @@ export const searchQuery = async (query: string) => {
         body: JSON.stringify(body)
       });
 
-
-    // const json = await response.json();
-    // console.log(json);
-
-    // return json;
-
     if (!response.ok) {
       throw new Error(`HTTP ${response.status} ${response.statusText}`);
     }
   
     const output = await response.json();
-    //console.log(output.places);
 
     if (output.places) {
       return output.places;
