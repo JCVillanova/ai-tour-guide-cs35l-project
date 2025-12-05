@@ -1,3 +1,5 @@
+//note - this file is not really needed now
+
 import { MongoClient, ServerApiVersion } from "mongodb";
 
 const uri = process.env.ATLAS_URI || "";

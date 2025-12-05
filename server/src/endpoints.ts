@@ -1,7 +1,7 @@
 const express = require("express");
 import { Request, Response } from "express";
 const router = express.Router();
-const User = require("../models/User"); // Mongoose model
+const User = require("./models/User"); // Mongoose model
 
 // async function storeUserData(req: any, res: any) {
 //   try {
