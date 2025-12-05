@@ -250,18 +250,39 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
       <ThemedText type='subtitle'
         style={{
           fontFamily: Fonts.rounded,
+          marginBottom: 16,
         }}
       >En route to {destination}</ThemedText>
-      <ScrollView
-        style={styles.infoScroll}
-        contentContainerStyle={styles.infoScrollContent}
-      >
-        {infoBlocks.map((block, index) => (
-          <ThemedView key={index} style={styles.infoBlock}>
-            <ThemedText style={styles.infoText}>{block}</ThemedText>
-          </ThemedView>
-        ))}
-      </ScrollView>
+      {infoBlocks.length === 0 ?
+      (
+        <ThemedView
+          style={{
+            alignItems: 'center',
+            flex: 1,
+            justifyContent: 'center',
+          }}
+        >
+          <ThemedText
+            style={{
+              fontSize: 30,
+              lineHeight: 30,
+            }}
+          >Loading your guide...</ThemedText>
+        </ThemedView>
+      ) : (
+        <ThemedView style={{ flex: 1 }}>
+          <ScrollView
+            style={styles.infoScroll}
+            contentContainerStyle={styles.infoScrollContent}
+          >
+            {infoBlocks.map((block, index) => (
+              <ThemedView key={index} style={styles.infoBlock}>
+                <ThemedText style={styles.infoText}>{block}</ThemedText>
+              </ThemedView>
+            ))}
+          </ScrollView>
+        </ThemedView>
+      )}
       <ThemedButton
         onPress={handleExit}
         content='Exit'
@@ -338,7 +359,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
         // Google returns an encoded string for the route points
         const encodedPolyline = json.routes[0].polyline.encodedPolyline;
 
-        // You must decode this string into an array of {latitude, longitude}
+        // Decode this string into an array of {latitude, longitude}
         const decodedPoints = polyline.decode(encodedPolyline);
         points = decodedPoints.map((point: [number, number]) => ({
           latitude: point[0],
@@ -627,7 +648,6 @@ const styles = StyleSheet.create({
     borderTopColor: '#333',
   },
   infoScroll: {
-    borderRadius: 12,
     flex: 1,
     marginBottom: 16,
   },
