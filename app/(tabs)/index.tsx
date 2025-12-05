@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedTextInput } from '@/components/themed-text-input';
@@ -259,6 +259,8 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
           style={{
             alignItems: 'center',
             flex: 1,
+            flexDirection: 'row',
+            gap: 8,
             justifyContent: 'center',
           }}
         >
@@ -268,6 +270,7 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
               lineHeight: 30,
             }}
           >Loading your guide...</ThemedText>
+          <Image style={styles.loading} source={require('../../assets/loading.gif')}></Image>
         </ThemedView>
       ) : (
         <ThemedView style={{ flex: 1 }}>
@@ -658,6 +661,10 @@ const styles = StyleSheet.create({
     flex: 1,
     color: '#ffffff',
     fontSize: 14,
+  },
+  loading: {
+    height: 30,
+    width: 30,
   },
   mapContainer: {
     flex: 1,
