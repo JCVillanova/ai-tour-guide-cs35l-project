@@ -38,7 +38,12 @@ PORT=3000
 To set up the development system for Expo Go (connects from a phone) run the following command in the root director.
 ```
 $ npx expo start --tunnel
+
 ```
+![Explore Tab Sequence Diagram](Explore_Tab_Sequence_Diagram.png)
+![Runtime-Component Diagram](Full_System_Runtime-Component_View.drawio.png)
+
+
 Then, open a new terminal and navigate to the server directory. Run the following command:
 ```
 $ npm run dev
