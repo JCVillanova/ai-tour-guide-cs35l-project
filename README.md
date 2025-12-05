@@ -25,6 +25,10 @@ This tab handles user authentication. It is a typical login screen that provides
 
 A user needs to login on this screen in order for the History tab to work properly. If the user is not logged in, History will show a different screen directing the user to the this tab.
 
+## Diagrams
+![Explore Tab Sequence Diagram](Explore_Tab_Sequence_Diagram.png)
+![Runtime-Component Diagram](Full_System_Runtime-Component_View.drawio.png)
+
 # Setup
 You will need a `.env` file in both your root directory and the server directory (for any of the Google Maps and Gemini prompting systems to work). Enter the following keys in the files:
 ```
@@ -38,11 +42,7 @@ PORT=3000
 To set up the development system for Expo Go (connects from a phone) run the following command in the root director.
 ```
 $ npx expo start --tunnel
-
 ```
-![Explore Tab Sequence Diagram](Explore_Tab_Sequence_Diagram.png)
-![Runtime-Component Diagram](Full_System_Runtime-Component_View.drawio.png)
-
 
 Then, open a new terminal and navigate to the server directory. Run the following command:
 ```
