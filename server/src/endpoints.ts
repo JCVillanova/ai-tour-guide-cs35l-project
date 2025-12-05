@@ -30,6 +30,7 @@ router.put("/users", async (req: Request, res: Response) => {
     }
     const bcrypt = require("bcryptjs"); //hash the password before storing
     const encryptedPassword = await bcrypt.hash(password, 10);
+    console.log("Encrypted password:", encryptedPassword);
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {

@@ -107,10 +107,7 @@ function EnterSignUpInfo({
 
       if (response.error) {
         Alert.alert("Error", response.error);
-      } else if (
-        response.message &&
-        response.message.includes("successfully")
-      ) {
+      } else if (response.message && response.message.includes("created")) {
         Alert.alert("Success", "Account created! You can now log in.", [
           {
             text: "OK",

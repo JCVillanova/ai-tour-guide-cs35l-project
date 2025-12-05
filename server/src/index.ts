@@ -22,6 +22,14 @@ app.get("/", (req, res) => {
 async function startServer() {
   try {
     await mongoose.connect(process.env.ATLAS_URI || "");
+
+    const collections = await mongoose.connection.db
+      .listCollections()
+      .toArray();
+    console.log(
+      "📁 Collections in database:",
+      collections.map((c) => c.name)
+    ); //using this debug line to test if it is actually connecting to the db
     // Start server
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
