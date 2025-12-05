@@ -1,8 +1,7 @@
 const express = require("express");
 import { Request, Response } from "express";
 const router = express.Router();
-const User = require("./models/User"); // Mongoose model
-import { run } from "./geminiprompttest";
+const User = require("../models/User"); // Mongoose model
 
 // async function storeUserData(req: any, res: any) {
 //   try {
@@ -122,97 +121,6 @@ router.get("/users/:id/history", async (req: Request, res: Response) => {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     res.status(500).json({ message });
-  }
-});
-
-router.get("/location-info", async (req: Request, res: Response) => {
-  try {
-    const locationName = req.query.name as string;
-
-    if (!locationName) {
-      return res.status(400).json({ message: "Location name is required" });
-    }
-
-    // Implement logic to fetch location info by name
-    res.json({ info: `Info for location: ${locationName}` });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return res.status(500).json({ message });
-  }
-});
-
-router.get("/locations-nearby", async (req: Request, res: Response) => {
-  try {
-    const latitude = parseFloat(req.query.latitude as string);
-    const longitude = parseFloat(req.query.longitude as string);
-
-    if (isNaN(latitude) || isNaN(longitude)) {
-      return res
-        .status(400)
-        .json({ message: "Valid latitude and longitude are required" });
-    }
-
-    // Implement logic to fetch nearby locations based on latitude and longitude
-    res.json({
-      locations: [
-        `Location1 near (${latitude}, ${longitude})`,
-        `Location2 near (${latitude}, ${longitude})`,
-      ],
-    });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return res.status(500).json({ message });
-  }
-});
-
-router.post("/test-echo", (req: Request, res: Response) => {
-  try {
-    const { text } = req.body;
-
-    if (!text || typeof text !== "string") {
-      return res.status(400).json({ message: "text string is required" });
-    }
-
-    const reversed = text.split("").reverse().join("");
-    return res.status(200).json({
-      message: "Test successful",
-      originalText: text,
-      reversedText: reversed,
-    });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return res.status(500).json({ message });
-  }
-});
-
-router.post("/tour-narration", async (req: Request, res: Response) => {
-  try {
-    const { placesText } = req.body;
-
-    if (!placesText || typeof placesText !== "string") {
-      return res.status(400).json({ message: "placesText string is required" });
-    }
-
-    if (placesText.trim().length === 0) {
-      return res
-        .status(400)
-        .json({ message: "placesText must be a non-empty string" });
-    }
-
-    const narration = await run(placesText);
-
-    if (!narration) {
-      return res
-        .status(200)
-        .json({ message: "No new sites available", narration: "" });
-    }
-
-    return res
-      .status(200)
-      .json({ message: "Narration generated successfully", narration });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return res.status(500).json({ message });
   }
 });
 
