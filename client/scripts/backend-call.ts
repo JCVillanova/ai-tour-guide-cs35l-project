@@ -115,6 +115,32 @@ async function getTourNarration(placesText: string): Promise<string> {
   return data.narration;
 }
 
+// Test endpoint (no external dependencies) to verify fetch works
+async function testEcho(
+  text: string
+): Promise<{ originalText: string; reversedText: string }> {
+  console.log("Testing fetch with simple echo endpoint...");
+  const response = await fetch(`${SERVER_URL}/test-echo`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text }),
+  });
+
+  if (!response.ok) {
+    console.error("Test echo failed with status:", response.status);
+    throw new Error(`Test echo failed: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  console.log("Test echo response:", data);
+  return {
+    originalText: data.originalText,
+    reversedText: data.reversedText,
+  };
+}
+
 export {
   createAccount,
   getLocationInfoByName,
@@ -124,4 +150,5 @@ export {
   handleLogin,
   logUserActivity,
   getTourNarration,
+  testEcho,
 };

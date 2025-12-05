@@ -165,6 +165,26 @@ router.get("/locations-nearby", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/test-echo", (req: Request, res: Response) => {
+  try {
+    const { text } = req.body;
+
+    if (!text || typeof text !== "string") {
+      return res.status(400).json({ message: "text string is required" });
+    }
+
+    const reversed = text.split("").reverse().join("");
+    return res.status(200).json({
+      message: "Test successful",
+      originalText: text,
+      reversedText: reversed,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return res.status(500).json({ message });
+  }
+});
+
 router.post("/tour-narration", async (req: Request, res: Response) => {
   try {
     const { placesText } = req.body;
