@@ -93,13 +93,15 @@ export default function TourScreen() {
     } else {
       placesText = 'No nearby places found.';
     }
-
-    const geminiPrompt = await run(placesText);
-    if (geminiPrompt === '') {
-      return;
+    try{
+      const geminiPrompt = await run(placesText);
+      if (geminiPrompt === '') {
+        return;
+      }
+      setInfoBlocks((infoBlocks) => [...infoBlocks, geminiPrompt]);
+    }catch (e) {// catch network missing errors caused by walking around
+      console.warn("Gemini network error:", e);
     }
-
-    setInfoBlocks((infoBlocks) => [...infoBlocks, geminiPrompt]);
   };
 
   const startTour = async () => {
