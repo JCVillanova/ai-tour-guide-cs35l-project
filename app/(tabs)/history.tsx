@@ -111,7 +111,7 @@ export default function HistoryScreen() {
           History
         </ThemedText>
       </ThemedView>
-      <ThemedText>This section should have various history features to access past user activity.</ThemedText>
+      <ThemedText>View any of your previous tours here!</ThemedText>
       <ScrollView
         style={styles.infoScroll}
         contentContainerStyle={styles.infoScrollContent}
