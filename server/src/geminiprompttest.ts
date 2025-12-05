@@ -1,30 +1,28 @@
 // import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-import dotenv from "dotenv";
-import path from "path";
-import fs from "fs";
-
-// import Config from 'react-native-config';
-//import dotenv from 'react-native-dotenv';
-//require('react-native-dotenv').config({path: '../.env'})
-//dotenv.config({ path: findConfig('.env') });
-//import { GEMINI_KEY } from '@env';
-
-dotenv.config({ path: path.resolve(__dirname, ".env") });
-const apiKey: string | undefined = process.env.GEMINI_API_KEY;
+// Environment variables are loaded in index.ts; no need to load again here
+// Accept either GEMINI_API_KEY or GEMINI_KEY for backwards compatibility
+const apiKey: string | undefined = process.env.GEMINI_API_KEY || process.env.GEMINI_KEY;
 
 if (!apiKey) {
-  console.error("GEMINI_KEY not found");
-  process.exit(1);
+  console.warn("GEMINI_KEY not found; Gemini calls will fail until configured.");
 }
 
-const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+let genAI: any = null;
+let model: any = null;
+if (apiKey) {
+  genAI = new GoogleGenerativeAI(apiKey);
+  model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+}
 
 const usedSites = new Set<string>();
 
 export async function run(places: any) {
+  if (!model) {
+    throw new Error("GEMINI_API_KEY not configured on the server");
+  }
+
   const usedSitesList = Array.from(usedSites);
   const usedSitesText =
     usedSitesList.length > 0 ? usedSitesList.join(", ") : "none yet";

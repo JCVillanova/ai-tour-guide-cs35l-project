@@ -1,4 +1,4 @@
-const SERVER_URL = "http://172.26.81.117:3000";
+const SERVER_URL = "http://10.229.218.1:5000";
 
 async function handleLogin(email: string, password: string) {
   const response = await fetch(`${SERVER_URL}/users/authenticate`, {
