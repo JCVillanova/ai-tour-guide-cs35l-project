@@ -3,11 +3,11 @@ import { ThemedTextInput } from "@/components/themed-text-input";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedButton } from "@/components/ui/themed-button";
 import { Fonts } from "@/constants/theme";
+import { createAccount, handleLogin } from "@/scripts/backend-call";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { StyleSheet } from "react-native";
-// import { createAccount, handleLogin } from "../../scripts/backend-call";
-import { createAccount, handleLogin } from "@/scripts/backend-call";
+import { Alert, StyleSheet } from "react-native";
 import { useAuth } from "../auth_context";
 
 interface AuthFormProps {
@@ -51,6 +51,8 @@ function EnterLogonInfo({
         placeholder="Email"
         value={email}
         onChangeText={(text) => setEmail(text)}
+        autoCapitalize="none"
+        keyboardType="email-address"
       />
       <ThemedTextInput
         secureTextEntry={true}
@@ -85,13 +87,49 @@ function EnterSignUpInfo({
   setInSignUp,
   onSubmit,
 }: AuthFormProps) {
-  function createAccountClick() {
-    if (email == "" || password == "") {
-      console.error("Email and password cannot be empty");
+  const [loading, setLoading] = useState(false);
+
+  async function createAccountClick() {
+    if (email === "" || password === "") {
+      Alert.alert("Error", "Email and password cannot be empty");
       return;
     }
-    createAccount(email, password);
-    setInSignUp(false);
+
+    if (password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await createAccount(email, password);
+      console.log("Create account response:", response);
+
+      if (response.error) {
+        Alert.alert("Error", response.error);
+      } else if (
+        response.message &&
+        response.message.includes("successfully")
+      ) {
+        Alert.alert("Success", "Account created! You can now log in.", [
+          {
+            text: "OK",
+            onPress: () => {
+              setInSignUp(false);
+              setEmail("");
+              setPassword("");
+            },
+          },
+        ]);
+      } else {
+        Alert.alert("Error", "Failed to create account. Please try again.");
+      }
+    } catch (error) {
+      console.error("Create account error:", error);
+      Alert.alert("Error", "Network error. Make sure the server is running.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -118,6 +156,8 @@ function EnterSignUpInfo({
         placeholder="Email"
         value={email}
         onChangeText={(text) => setEmail(text)}
+        autoCapitalize="none"
+        keyboardType="email-address"
       />
       <ThemedTextInput
         secureTextEntry={true}
@@ -138,11 +178,13 @@ function EnterSignUpInfo({
       >
         <ThemedButton
           onPress={() => createAccountClick()}
-          content="Create Account"
+          content={loading ? "Creating..." : "Create Account"}
+          disabled={loading}
         ></ThemedButton>
         <ThemedButton
           onPress={() => (setInSignUp(false), setEmail(""), setPassword(""))}
           content="Back to Login"
+          disabled={loading}
         ></ThemedButton>
       </ThemedView>
     </ThemedView>
@@ -153,17 +195,43 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [inSignUp, setInSignUp] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const { login, userName } = useAuth();
 
   const handleLoginClick = async () => {
+    if (email === "" || password === "") {
+      Alert.alert("Error", "Email and password cannot be empty");
+      return;
+    }
+
+    setLoading(true);
     try {
       const response = await handleLogin(email, password);
-      await login(email);
-      console.log("Logged in successfully as", email);
+      console.log("Login response:", response);
+
+      if (response.error) {
+        Alert.alert("Login Failed", response.error);
+      } else if (
+        response.message &&
+        response.message.includes("successfully")
+      ) {
+        await login(email);
+        console.log("Logged in successfully as", email);
+        await AsyncStorage.setItem("userEmail", email);
+        Alert.alert("Success", `Welcome back, ${email}!`);
+      } else {
+        Alert.alert("Login Failed", "Invalid credentials. Please try again.");
+      }
     } catch (error) {
       console.error("Login failed:", error);
+      Alert.alert(
+        "Error",
+        "Network error. Make sure the server is running and reachable."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 

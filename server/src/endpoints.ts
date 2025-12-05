@@ -18,10 +18,12 @@ const User = require("./models/User"); // Mongoose model
 // router.post("/store-user", storeUserData);
 
 router.put("/users", async (req: Request, res: Response) => {
+  console.log("Received request to create user:", req.body);
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
+      console.log("Missing email or password in request body");
       return res
         .status(400)
         .json({ message: "Email and encryptedPassword are required" });
@@ -31,11 +33,13 @@ router.put("/users", async (req: Request, res: Response) => {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log("User with this email already exists:", email);
       return res.status(409).json({ message: "Email already exists" });
     }
 
     const newUser = new User({ email, password: encryptedPassword });
     await newUser.save();
+    console.log("User created successfully:", email);
 
     const userObj = newUser.toObject();
     delete userObj.password; // don't return password
