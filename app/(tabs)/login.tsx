@@ -2,12 +2,12 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedTextInput } from "@/components/themed-text-input";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedButton } from "@/components/ui/themed-button";
-import { Fonts } from '@/constants/theme';
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Fonts } from "@/constants/theme";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { StyleSheet } from 'react-native';
-import { createAccount, handleLogin } from "../../scripts/backend-call";
+import { StyleSheet } from "react-native";
+// import { createAccount, handleLogin } from "../../scripts/backend-call";
+import { createAccount, handleLogin } from "@/scripts/backend-call";
 import { useAuth } from "../auth_context";
 
 interface AuthFormProps {
@@ -19,24 +19,34 @@ interface AuthFormProps {
   onSubmit?: () => void;
 }
 
-function EnterLogonInfo({ email, setEmail, password, setPassword, setInSignUp, onSubmit }: AuthFormProps) {
+function EnterLogonInfo({
+  email,
+  setEmail,
+  password,
+  setPassword,
+  setInSignUp,
+  onSubmit,
+}: AuthFormProps) {
   return (
     <ThemedView
       style={{
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
         flex: 1,
         gap: 16,
-        height: '100%',
-        justifyContent: 'center',
+        height: "100%",
+        justifyContent: "center",
         padding: 32,
       }}
     >
-      <ThemedText type="title"
+      <ThemedText
+        type="title"
         style={{
           fontFamily: Fonts.rounded,
-          textAlign: 'center',
+          textAlign: "center",
         }}
-      >Login</ThemedText>
+      >
+        Login
+      </ThemedText>
       <ThemedTextInput
         placeholder="Email"
         value={email}
@@ -50,21 +60,31 @@ function EnterLogonInfo({ email, setEmail, password, setPassword, setInSignUp, o
       />
       <ThemedView
         style={{
-          backgroundColor: 'transparent',
-          flexDirection: 'row',
+          backgroundColor: "transparent",
+          flexDirection: "row",
           gap: 16,
-          marginLeft: 'auto',
-          marginRight: 'auto',
+          marginLeft: "auto",
+          marginRight: "auto",
         }}
       >
         <ThemedButton onPress={onSubmit} content="Login"></ThemedButton>
-        <ThemedButton content="Sign Up" onPress={() => (setInSignUp(true), setEmail(''), setPassword(''))} ></ThemedButton>
+        <ThemedButton
+          content="Sign Up"
+          onPress={() => (setInSignUp(true), setEmail(""), setPassword(""))}
+        ></ThemedButton>
       </ThemedView>
     </ThemedView>
   );
 }
 
-function EnterSignUpInfo({ email, setEmail, password, setPassword, setInSignUp, onSubmit }: AuthFormProps) {
+function EnterSignUpInfo({
+  email,
+  setEmail,
+  password,
+  setPassword,
+  setInSignUp,
+  onSubmit,
+}: AuthFormProps) {
   function createAccountClick() {
     if (email == "" || password == "") {
       console.error("Email and password cannot be empty");
@@ -77,20 +97,23 @@ function EnterSignUpInfo({ email, setEmail, password, setPassword, setInSignUp, 
   return (
     <ThemedView
       style={{
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
         flex: 1,
         gap: 16,
-        height: '100%',
-        justifyContent: 'center',
+        height: "100%",
+        justifyContent: "center",
         padding: 32,
       }}
     >
-      <ThemedText type="title"
+      <ThemedText
+        type="title"
         style={{
           fontFamily: Fonts.rounded,
-          textAlign: 'center',
+          textAlign: "center",
         }}
-      >Create Account</ThemedText>
+      >
+        Create Account
+      </ThemedText>
       <ThemedTextInput
         placeholder="Email"
         value={email}
@@ -104,17 +127,23 @@ function EnterSignUpInfo({ email, setEmail, password, setPassword, setInSignUp, 
       />
       <ThemedView
         style={{
-          alignItems: 'center',
-          backgroundColor: 'transparent',
-          flexDirection: 'column',
+          alignItems: "center",
+          backgroundColor: "transparent",
+          flexDirection: "column",
           gap: 16,
-          marginLeft: 'auto',
-          marginRight: 'auto',
+          marginLeft: "auto",
+          marginRight: "auto",
           marginTop: 8,
         }}
       >
-        <ThemedButton onPress={() => createAccountClick()} content="Create Account"></ThemedButton>
-        <ThemedButton onPress={() => (setInSignUp(false), setEmail(''), setPassword(''))} content="Back to Login"></ThemedButton>
+        <ThemedButton
+          onPress={() => createAccountClick()}
+          content="Create Account"
+        ></ThemedButton>
+        <ThemedButton
+          onPress={() => (setInSignUp(false), setEmail(""), setPassword(""))}
+          content="Back to Login"
+        ></ThemedButton>
       </ThemedView>
     </ThemedView>
   );
@@ -131,7 +160,7 @@ function LoginPage() {
   const handleLoginClick = async () => {
     try {
       const response = await handleLogin(email, password);
-      await login(email); 
+      await login(email);
       console.log("Logged in successfully as", email);
     } catch (error) {
       console.error("Login failed:", error);
@@ -141,49 +170,51 @@ function LoginPage() {
   if (userName) {
     const { logout } = useAuth();
     return (
-      <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ThemedView
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      >
         <ThemedText>Hello, {userName}!</ThemedText>
         <ThemedButton content="Logout" onPress={logout} />
       </ThemedView>
-    )
+    );
   }
 
   return (
     <ThemedView
       style={{
-        alignItems: 'center',
-        height: '100%',
+        alignItems: "center",
+        height: "100%",
       }}
     >
       <ThemedView
         style={{
-          alignItems: 'center',
-          backgroundColor: 'rgba(255, 255, 255, 0.2)',
-          borderColor: 'white',
+          alignItems: "center",
+          backgroundColor: "rgba(255, 255, 255, 0.2)",
+          borderColor: "white",
           borderRadius: 24,
           borderWidth: 1,
-          height: inSignUp ? '45%' : '35%',
-          margin: 'auto',
-          width: '80%',
+          height: inSignUp ? "45%" : "35%",
+          margin: "auto",
+          width: "80%",
         }}
       >
         {inSignUp ? (
           <EnterSignUpInfo
-            email={email} 
-            setEmail={setEmail} 
-            password={password} 
-            setPassword={setPassword} 
+            email={email}
+            setEmail={setEmail}
+            password={password}
+            setPassword={setPassword}
             setInSignUp={setInSignUp}
           />
         ) : (
           <EnterLogonInfo
-            email={email} 
-            setEmail={setEmail} 
-            password={password} 
-            setPassword={setPassword} 
-            setInSignUp={setInSignUp} 
+            email={email}
+            setEmail={setEmail}
+            password={password}
+            setPassword={setPassword}
+            setInSignUp={setInSignUp}
             onSubmit={handleLoginClick}
-          /> 
+          />
         )}
       </ThemedView>
     </ThemedView>
@@ -192,6 +223,4 @@ function LoginPage() {
 
 export default LoginPage;
 
-const styles = StyleSheet.create({
-  
-});
+const styles = StyleSheet.create({});
