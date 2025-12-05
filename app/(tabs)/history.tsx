@@ -1,23 +1,23 @@
-import { useCallback, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useMemo, useState } from "react";
+import { ScrollView, StyleSheet } from "react-native";
 
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { ThemedButton } from '@/components/ui/themed-button';
-import { Collapsible } from '@/components/ui/collapsible';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+import ParallaxScrollView from "@/components/parallax-scroll-view";
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { Collapsible } from "@/components/ui/collapsible";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { ThemedButton } from "@/components/ui/themed-button";
+import { Fonts } from "@/constants/theme";
 
-import { getHistory, type TourRecord } from '@/scripts/history-storage';
+import { getHistory, type TourRecord } from "@/scripts/history-storage";
 
-import { useRouter } from 'expo-router';
-import { useAuth } from '../auth_context';
+import { useRouter } from "expo-router";
+import { useAuth } from "../auth_context";
 
 function splitGeminiOutput(geminiOutput: string): string[] {
   const delimiter = "====================";
-  return geminiOutput.split(delimiter).filter(text => text.trim().length > 0);
+  return geminiOutput.split(delimiter).filter((text) => text.trim().length > 0);
 }
 
 function SavedTour({
@@ -32,28 +32,24 @@ function SavedTour({
   }, [geminiOutput]);
 
   return (
-    <Collapsible title={title + ' ' + date} large={true}>
+    <Collapsible title={title + " " + date} large={true}>
       <ThemedView style={styles.savedTourContent}>
-        <ThemedText type='defaultSemiBold' style={styles.savedTourCategory}>
+        <ThemedText type="defaultSemiBold" style={styles.savedTourCategory}>
           Starting Point:
         </ThemedText>
-        <ThemedText type='default'>
-          {startingPoint}
-        </ThemedText>
-        <ThemedText type='defaultSemiBold' style={styles.savedTourCategory}>
+        <ThemedText type="default">{startingPoint}</ThemedText>
+        <ThemedText type="defaultSemiBold" style={styles.savedTourCategory}>
           Destination:
         </ThemedText>
-        <ThemedText type='default'>
-          {destination}
-        </ThemedText>
-        <Collapsible title='Tour Guide Info:' large={false}>
+        <ThemedText type="default">{destination}</ThemedText>
+        <Collapsible title="Tour Guide Info:" large={false}>
           <ThemedView
-            style={styles.infoScroll &&
-              {
-                backgroundColor: 'transparent',
+            style={
+              styles.infoScroll && {
+                backgroundColor: "transparent",
                 gap: 8,
                 marginTop: 8,
-                width: '100%',
+                width: "100%",
               }
             }
           >
@@ -93,7 +89,7 @@ export default function HistoryScreen() {
   if (!userName) {
     return (
       <ParallaxScrollView
-        headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+        headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
         headerImage={
           <IconSymbol
             size={310}
@@ -110,14 +106,14 @@ export default function HistoryScreen() {
             History
           </ThemedText>
         </ThemedView>
-        
-        <ThemedView style={{ gap: 20, marginTop: 16, alignItems: 'center' }}>
-          <ThemedText type="subtitle" style={{textAlign: 'center'}}>
+
+        <ThemedView style={{ gap: 20, marginTop: 16, alignItems: "center" }}>
+          <ThemedText type="subtitle" style={{ textAlign: "center" }}>
             Please log in to view your tour history.
           </ThemedText>
-          <ThemedButton 
-            content="Go to Login" 
-            onPress={() => router.navigate('/login')} 
+          <ThemedButton
+            content="Go to Login"
+            onPress={() => router.navigate("/login")}
           />
         </ThemedView>
       </ParallaxScrollView>
@@ -126,7 +122,7 @@ export default function HistoryScreen() {
 
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+      headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
       headerImage={
         <IconSymbol
           size={310}
@@ -143,7 +139,8 @@ export default function HistoryScreen() {
           type="title"
           style={{
             fontFamily: Fonts.rounded,
-          }}>
+          }}
+        >
           History
         </ThemedText>
       </ThemedView>
@@ -152,17 +149,22 @@ export default function HistoryScreen() {
         style={styles.infoScroll}
         contentContainerStyle={styles.infoScrollContent}
       >
-        {historyBlocks.map((block, index) => ( // Each tour saved in history is put inside an infoBlock
-          <ThemedView key={index} style={styles.infoBlock}>
-            <SavedTour
-              title={block.title}
-              startingPoint={block.startingPoint}
-              destination={block.destination}
-              geminiOutput={block.geminiOutput}
-              date={block.date}
-            />
-          </ThemedView>
-        ))}
+        {historyBlocks.map(
+          (
+            block,
+            index // Each tour saved in history is put inside an infoBlock
+          ) => (
+            <ThemedView key={index} style={styles.infoBlock}>
+              <SavedTour
+                title={block.title}
+                startingPoint={block.startingPoint}
+                destination={block.destination}
+                geminiOutput={block.geminiOutput}
+                date={block.date}
+              />
+            </ThemedView>
+          )
+        )}
       </ScrollView>
     </ParallaxScrollView>
   );
@@ -170,29 +172,29 @@ export default function HistoryScreen() {
 
 const styles = StyleSheet.create({
   headerImage: {
-    color: '#808080',
+    color: "#808080",
     bottom: -90,
     left: -35,
-    position: 'absolute',
+    position: "absolute",
   },
   infoBlock: {
     padding: 12,
-    borderColor: 'white',
+    borderColor: "white",
     borderRadius: 12,
     borderWidth: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
   },
   infoBullet: {
     marginRight: 8,
     marginTop: 2,
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 16,
   },
   infoContainer: {
     flex: 1, // bottom half
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderTopWidth: 1,
-    borderTopColor: '#333',
+    borderTopColor: "#333",
   },
   infoScroll: {
     borderRadius: 12,
@@ -204,20 +206,20 @@ const styles = StyleSheet.create({
   },
   infoText: {
     flex: 1,
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 14,
   },
   savedTourCategory: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     fontSize: 18,
   },
   savedTourContent: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     gap: 8,
     paddingTop: 4,
   },
   titleContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
     marginTop: 32,
   },

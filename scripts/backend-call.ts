@@ -1,7 +1,7 @@
 //NOTE - THE ADDRESS BEFORE 3000 MUST BE YOUR IP ADDRESS OF YOUR LOCAL MACHINE
 //      - TO FIND YOUR IP ADDRESS, RUN "ipconfig" IN COMMAND PROMPT AND LOOK FOR "IPv4 Address"
 //      - REPLACE ALL OCCURRENCES OF THE OLD IP ADDRESS WITH YOUR NEW IP ADDRESS
-let SERVER_URL = "http://10.229.218.1:3000";
+let SERVER_URL = "http://172.20.10.2:3000";
 
 async function handleLogin(email: string, password: string) {
   const response = await fetch(`${SERVER_URL}/users/authenticate`, {
