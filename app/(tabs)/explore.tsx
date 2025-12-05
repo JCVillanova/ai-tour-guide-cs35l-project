@@ -30,16 +30,22 @@ export default function TourScreen() {
     warmGemini();
   }, []);
 
-  // keep tourOnRef in sync with state
+  // keep tourOnRef in sync with state (used by TTS loop)
   useEffect(() => {
     tourOnRef.current = tourOn;
   }, [tourOn]);
 
-  // current gps coords
+  // current gps coords (for UI / map)
   const [currentCoords, setCurrentCoords] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
+
+  // ref with latest coords for interval / Gemini
+  const coordsRef = useRef<{ latitude: number; longitude: number } | null>(null);
+  useEffect(() => {
+    coordsRef.current = currentCoords;
+  }, [currentCoords]);
 
   // Range in meters for circle radius and prompt
   const [rangeMeters, setRangeMeters] = useState<number>(30);
@@ -47,13 +53,11 @@ export default function TourScreen() {
 
   // prompt cooldown in seconds
   const [promptIntervalSec, setPromptIntervalSec] = useState<number>(5);
-  const [promptIntervalInput, setPromptIntervalInput] =
-    useState<string>('5');
+  const [promptIntervalInput, setPromptIntervalInput] = useState<string>('5');
 
   const mapRef = useRef<MapView | null>(null);
   const watchRef = useRef<Location.LocationSubscription | null>(null);
-  const promptTimerRef =
-    useRef<ReturnType<typeof setInterval> | null>(null);
+  const promptTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Stop GPS watcher and prompt timer when we leave the screen
   useEffect(() => {
@@ -69,29 +73,33 @@ export default function TourScreen() {
   }, []);
 
   const promptGemini = async () => {
-    if (currentCoords) {
-      // Await the places search so we pass meaningful text to the Gemini prompt
-      const places = await GetPlacesInRadius(currentCoords.latitude, currentCoords.longitude, rangeMeters);
+    const coords = coordsRef.current;
+    if (!coords) return;
 
-      // Convert results to readable text (name / vicinity / formatted_address)
-      let placesText: string;
-      if (Array.isArray(places) && places.length > 0) {
-        placesText = places
-          .map((p: any, i: number) => {
-            const name = p.name || p.vicinity || p.formatted_address;
-            return `${i + 1}. ${name ?? JSON.stringify(p)}`;
-          })
-          .join('\n');
-      } else {
-        placesText = 'No nearby places found.';
-      }
+    const places = await GetPlacesInRadius(
+      coords.latitude,
+      coords.longitude,
+      rangeMeters
+    );
 
-      const geminiPrompt = await run(placesText);
-      if (geminiPrompt == '') {
-        return;
-      }
-      setInfoBlocks((infoBlocks) => [...infoBlocks, geminiPrompt]);
+    let placesText: string;
+    if (Array.isArray(places) && places.length > 0) {
+      placesText = places
+        .map((p: any, i: number) => {
+          const name = p.name || p.vicinity || p.formatted_address;
+          return `${i + 1}. ${name ?? JSON.stringify(p)}`;
+        })
+        .join('\n');
+    } else {
+      placesText = 'No nearby places found.';
     }
+
+    const geminiPrompt = await run(placesText);
+    if (geminiPrompt === '') {
+      return;
+    }
+
+    setInfoBlocks((infoBlocks) => [...infoBlocks, geminiPrompt]);
   };
 
   const startTour = async () => {
@@ -139,26 +147,36 @@ export default function TourScreen() {
     }
   };
 
+  // Interval that periodically calls promptGemini
   useEffect(() => {
+    if (!tourOn || promptIntervalSec <= 0) {
+      if (promptTimerRef.current) {
+        clearInterval(promptTimerRef.current);
+        promptTimerRef.current = null;
+      }
+      return;
+    }
+
+    // clear any existing interval before creating a new one
     if (promptTimerRef.current) {
       clearInterval(promptTimerRef.current);
       promptTimerRef.current = null;
     }
 
-    if (!tourOn || promptIntervalSec <= 0) {
-      return;
-    }
+    const id = setInterval(() => {
+      promptGemini();
+    }, promptIntervalSec * 1000);
 
-    const intervalGemini = setInterval(promptGemini, promptIntervalSec * 1000);
+    promptTimerRef.current = id;
 
+    // cleanup
     return () => {
       if (promptTimerRef.current) {
         clearInterval(promptTimerRef.current);
         promptTimerRef.current = null;
       }
-      clearInterval(intervalGemini);
     };
-  }, [tourOn, promptIntervalSec, rangeMeters, currentCoords]);
+  }, [tourOn, promptIntervalSec, rangeMeters]);
 
   useEffect(() => {
     infoBlocksRef.current = infoBlocks;
@@ -181,7 +199,6 @@ export default function TourScreen() {
     }
 
     const readNext = () => {
-      // Always gate on ref so late callbacks can't restart after End Tour
       if (!tourOnRef.current) return;
 
       const blocks = infoBlocksRef.current;
@@ -199,19 +216,12 @@ export default function TourScreen() {
         onDone: () => {
           if (!tourOnRef.current) return;
           currentReadIndexRef.current += 1;
-          ttsTimeoutRef.current = setTimeout(
-            readNext,
-            READ_DELAY_MS
-          );
+          ttsTimeoutRef.current = setTimeout(readNext, READ_DELAY_MS);
         },
         onError: () => {
           if (!tourOnRef.current) return;
-          // skip block if error
           currentReadIndexRef.current += 1;
-          ttsTimeoutRef.current = setTimeout(
-            readNext,
-            READ_DELAY_MS
-          );
+          ttsTimeoutRef.current = setTimeout(readNext, READ_DELAY_MS);
         },
       });
     };
