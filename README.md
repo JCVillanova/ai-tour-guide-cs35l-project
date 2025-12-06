@@ -37,6 +37,23 @@ GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_KEY
 ATLAS_URI=YOUR_MONGODB_URI
 PORT=3000
 ```
+Note to TAs - we will send you all of this information
+run the following commands:
+```
+npm install
+cd server
+npm install
+```
+
+in order to run the actual app, do the following:
+```
+npx expo start --tunnel
+```
+and to start the server, do:
+```
+cd server
+npm run dev
+```
 
 # Development
 To set up the development system for Expo Go (connects from a phone) run the following command in the root director.
@@ -48,4 +65,5 @@ Then, open a new terminal and navigate to the server directory. Run the followin
 ```
 $ npm run dev
 ```
+
 This should fully set up the app, allowing it to run properly if everything is set up correctly.
