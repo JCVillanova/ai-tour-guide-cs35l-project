@@ -3,7 +3,7 @@ import { ThemedTextInput } from '@/components/themed-text-input';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedButton } from '@/components/ui/themed-button';
 import { Fonts } from '@/constants/theme';
-import { clearSites, run, warmGemini } from '@/scripts/geminiprompttest';
+import { clearSites, getGeminiResponse, warmGemini } from '@/scripts/geminiprompttest';
 import { GetPlacesInRadius } from '@/scripts/google-maps-util';
 import * as Location from 'expo-location';
 import * as Speech from 'expo-speech';
@@ -24,7 +24,7 @@ export default function TourScreen() {
   const [tourOn, setTourOn] = useState(false);
   const [infoBlocks, setInfoBlocks] = useState<string[]>([]);
   const infoBlocksRef = useRef<string[]>([]);
-  const ttsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const textToSpeechTimeoutRefRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const currentReadIndexRef = useRef(0);
   const tourOnRef = useRef(false);
 
@@ -32,18 +32,18 @@ export default function TourScreen() {
     warmGemini();
   }, []);
 
-  // keep tourOnRef in sync with state (used by TTS loop)
+  // Keep tourOnRef in sync with state (used by TTS loop)
   useEffect(() => {
     tourOnRef.current = tourOn;
   }, [tourOn]);
 
-  // current gps coords (for UI / map)
+  // Current gps coords (for UI / map)
   const [currentCoords, setCurrentCoords] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
 
-  // ref with latest coords for interval / Gemini
+  // Reference with latest coords for interval / Gemini
   const coordsRef = useRef<{ latitude: number; longitude: number } | null>(null);
   useEffect(() => {
     coordsRef.current = currentCoords;
@@ -74,6 +74,7 @@ export default function TourScreen() {
     };
   }, []);
 
+  // Pass places into a Gemini prompt and get information on the more interesting of those places
   const promptGemini = async () => {
     const coords = coordsRef.current;
     if (!coords) return;
@@ -95,18 +96,19 @@ export default function TourScreen() {
     } else {
       placesText = 'No nearby places found.';
     }
-    try{
-      const geminiPrompt = await run(placesText);
+    try {
+      const geminiPrompt = await getGeminiResponse(placesText);
       if (geminiPrompt === '') {
         return;
       }
       setInfoBlocks((infoBlocks) => [...infoBlocks, geminiPrompt]);
-    }catch (e) {// catch network missing errors caused by walking around
-      console.warn("Gemini network error:", e);
+    } catch (error) {  // Catch network missing errors caused by walking around
+      console.warn("Gemini network error:", error);
     }
   };
 
-  const startTour = async () => {
+  // Start the explore phase and set up the map
+  const startExplore = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') return;
 
@@ -136,7 +138,8 @@ export default function TourScreen() {
     );
   };
 
-  const endTour = () => {
+  // Exit out of the explore phase and shut down anything related, including Gemini
+  const endExplore = () => {
     watchRef.current?.remove();
     watchRef.current = null;
     setInfoBlocks([]);
@@ -161,7 +164,7 @@ export default function TourScreen() {
       return;
     }
 
-    // clear any existing interval before creating a new one
+    // Clear any existing interval before creating a new one
     if (promptTimerRef.current) {
       clearInterval(promptTimerRef.current);
       promptTimerRef.current = null;
@@ -173,7 +176,7 @@ export default function TourScreen() {
 
     promptTimerRef.current = id;
 
-    // cleanup
+    // Cleanup
     return () => {
       if (promptTimerRef.current) {
         clearInterval(promptTimerRef.current);
@@ -186,16 +189,16 @@ export default function TourScreen() {
     infoBlocksRef.current = infoBlocks;
   }, [infoBlocks]);
 
-  // text to speech
+  // Text to speech
   useEffect(() => {
-    const READ_DELAY_MS = 2000; // delay between finishing one block and starting the next
-    const EMPTY_WAIT_MS = 1000; // how often to check for new blocks when caught up
+    const READ_DELAY_MS = 2000;  // Delay between finishing one block and starting the next
+    const EMPTY_WAIT_MS = 1000;  // How often to check for new blocks when caught up
 
     // When tour stops, clean everything up
     if (!tourOn) {
-      if (ttsTimeoutRef.current) {
-        clearTimeout(ttsTimeoutRef.current);
-        ttsTimeoutRef.current = null;
+      if (textToSpeechTimeoutRefRef.current) {
+        clearTimeout(textToSpeechTimeoutRefRef.current);
+        textToSpeechTimeoutRefRef.current = null;
       }
       Speech.stop();
       currentReadIndexRef.current = 0;
@@ -206,43 +209,43 @@ export default function TourScreen() {
       if (!tourOnRef.current) return;
 
       const blocks = infoBlocksRef.current;
-      const idx = currentReadIndexRef.current;
+      const index = currentReadIndexRef.current;
 
       // No new blocks yet, check again later
-      if (idx >= blocks.length) {
-        ttsTimeoutRef.current = setTimeout(readNext, EMPTY_WAIT_MS);
+      if (index >= blocks.length) {
+        textToSpeechTimeoutRefRef.current = setTimeout(readNext, EMPTY_WAIT_MS);
         return;
       }
 
-      const text = blocks[idx];
+      const text = blocks[index];
 
       Speech.speak(text, {
         onDone: () => {
           if (!tourOnRef.current) return;
           currentReadIndexRef.current += 1;
-          ttsTimeoutRef.current = setTimeout(readNext, READ_DELAY_MS);
+          textToSpeechTimeoutRefRef.current = setTimeout(readNext, READ_DELAY_MS);
         },
         onError: () => {
           if (!tourOnRef.current) return;
           currentReadIndexRef.current += 1;
-          ttsTimeoutRef.current = setTimeout(readNext, READ_DELAY_MS);
+          textToSpeechTimeoutRefRef.current = setTimeout(readNext, READ_DELAY_MS);
         },
       });
     };
 
-    // start reading when tour on
+    // Start reading when tour on
     readNext();
 
-    // cleanup if tourOn off or effect re-runs
+    // Cleanup if tourOn is off or effect re-runs
     return () => {
-      if (ttsTimeoutRef.current) {
-        clearTimeout(ttsTimeoutRef.current);
-        ttsTimeoutRef.current = null;
+      if (textToSpeechTimeoutRefRef.current) {
+        clearTimeout(textToSpeechTimeoutRefRef.current);
+        textToSpeechTimeoutRefRef.current = null;
       }
     };
   }, [tourOn]);
 
-  // input boxes
+  // Handle user changes to input boxes
   const handleRangeChange = (text: string) => {
     setRangeInput(text);
     const value = parseFloat(text);
@@ -270,7 +273,7 @@ export default function TourScreen() {
         >
           <ThemedView style={styles.exploreContainer}>
             <ThemedButton
-              onPress={startTour}
+              onPress={startExplore}
               content='Start Exploring'
               size='large'
               style={{}}
@@ -307,8 +310,8 @@ export default function TourScreen() {
               )}
             </MapView>
 
-            <Pressable style={styles.endBtn} onPress={endTour}>
-              <Text style={styles.endBtnText}>End Tour</Text>
+            <Pressable style={styles.endBtn} onPress={endExplore}>
+              <Text style={styles.endBtnText}>Stop Exploring</Text>
             </Pressable>
           </ThemedView>
 

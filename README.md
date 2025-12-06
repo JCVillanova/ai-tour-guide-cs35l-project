@@ -39,7 +39,7 @@ PORT=3000
 ```
 
 > [!NOTE]
-To TAs - we will send you all of this information
+To TAs - we will send you all of this information.
 
 Run the following commands:
 ```

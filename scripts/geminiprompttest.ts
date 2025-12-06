@@ -25,7 +25,7 @@ export async function warmGemini(){
   const warm = await model.generateContent("send me only the word hello");
   return warm;
 }
-export async function run(places: any) {
+export async function getGeminiResponse(places: any) {
   // Turn our usedSites into a readable list for the prompt
   const usedSitesList = Array.from(usedSites);
   const usedSitesText =
