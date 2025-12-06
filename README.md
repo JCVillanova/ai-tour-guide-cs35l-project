@@ -44,8 +44,11 @@ npm install
 cd server
 npm install
 ```
-NOTE - due to eduroam and UCLA wifi, there are connection issues between the computer server and the client.
-In order to properly connect the two, you will have to be off the UCLA wifi - during our testing, we had to do this by connecting to a hotspot.
+
+> [!NOTE]
+> Due to eduroam and UCLA wifi, there are connection issues between the computer server and the client.
+
+In order to properly connect the two, you will have to be off the UCLA Wi-Fi - during our testing, we had to do this by connecting to a hotspot.
 In backendcalls.ts inside of the scripts folder, you will have to edit the following line:
 ```
 let SERVER_URL = "http://{your_ip_address}:3000";
