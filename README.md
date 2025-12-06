@@ -46,9 +46,9 @@ To TAs - we will send you all of this information.
 
 Run the following commands:
 ```
-npm install
-cd server
-npm install
+$ npm install
+$ cd server
+$ npm install
 ```
 
 > [!NOTE]
@@ -61,7 +61,7 @@ let SERVER_URL = "http://{your_ip_address}:3000";
 ```
 This should be the ip address of the computer running the server. You can make get your ip address with the following on windows:
 ```
-ipconfig
+$ ipconfig
 ```
 Make sure that it is on the same wifi network(or hotspot) as the actual phone when you run this.
 
@@ -81,10 +81,11 @@ This should fully set up the app, allowing it to run properly if everything is s
 
 To run tests:
 ```
-npx run jest
+$ npx run jest
 ```
 
 Presentation Link (featuring a video demo): https://docs.google.com/presentation/d/1l7gn0csWJ4jAGzpuT3A7S7yaNt5S-Y4JP0AOrlOCV8Y/edit?usp=sharing
+
 
 
 
