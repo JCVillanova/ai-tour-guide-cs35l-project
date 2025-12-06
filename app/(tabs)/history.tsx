@@ -15,11 +15,13 @@ import { getHistory, type TourRecord } from "@/scripts/history-storage";
 import { useRouter } from "expo-router";
 import { useAuth } from "../auth_context";
 
+// Split Gemini's output into reasonably sized sections (to be put into blocks)
 function splitGeminiOutput(geminiOutput: string): string[] {
   const delimiter = "====================";
   return geminiOutput.split(delimiter).filter((text) => text.trim().length > 0);
 }
 
+// Return a collapsible element that holds the history of one tour
 function SavedTour({
   title,
   startingPoint,
@@ -65,8 +67,8 @@ function SavedTour({
   );
 }
 
+// Compile all tour histories in one list and display it
 export default function HistoryScreen() {
-  // TODO: REPLACE DUMMY CONTENT WITH ACTUAL TOUR HISTORY LINKED TO GIVEN ACCOUNT
   const { userName } = useAuth();
   const router = useRouter();
 
@@ -86,6 +88,7 @@ export default function HistoryScreen() {
     }, [userName]) // Re-run if userEmail changes
   );
 
+  // Direct the user to login if they aren't logged in
   if (!userName) {
     return (
       <ParallaxScrollView
@@ -94,7 +97,7 @@ export default function HistoryScreen() {
           <IconSymbol
             size={310}
             color="#808080"
-            name="lock.fill" // changed icon to lock
+            name="lock.fill"
             style={styles.headerImage}
           />
         }
