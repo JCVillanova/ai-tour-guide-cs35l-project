@@ -26,7 +26,10 @@ This tab handles user authentication. It is a typical login screen that provides
 A user needs to login on this screen in order for the History tab to work properly. If the user is not logged in, History will show a different screen directing the user to the this tab.
 
 ## Diagrams
+# Explore Tab Sequence Diagram
 ![Explore Tab Sequence Diagram](Explore_Tab_Sequence_Diagram.png)
+
+# Run-Time Component Diagram for Full System
 ![Runtime-Component Diagram](Full_System_Runtime-Component_View.drawio.png)
 
 # Setup
@@ -75,4 +78,5 @@ $ npm run dev
 ```
 
 This should fully set up the app, allowing it to run properly if everything is set up correctly.
+
 
