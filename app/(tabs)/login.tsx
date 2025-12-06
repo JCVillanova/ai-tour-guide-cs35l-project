@@ -118,7 +118,7 @@ function EnterSignUpInfo({
     if (isValidPassword(password) === false) {
       Alert.alert(
         "Error",
-        "Password must be at least 8 characters and contain only letters and numbers"
+        "Password must be at least 8 characters, and be aptly complex"
       );
       return;
     }

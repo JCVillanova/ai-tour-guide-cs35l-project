@@ -1,4 +1,3 @@
-import { ThemedTextInput } from '@/components/themed-text-input';
 import { ThemedText } from "@/components/themed-text";
 import { ThemedTextInput } from "@/components/themed-text-input";
 import { ThemedView } from "@/components/themed-view";
