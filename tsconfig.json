@@ -6,19 +6,16 @@
     //"strict": true,
     "noImplicitAny": false,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     },
-    "types": [
-      "google.maps"
-    ]
+    "types": ["google.maps"]
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "custom.d.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts",
+    "scripts/__tests__/TourScreen.e2e.test.jsx"
   ]
 }

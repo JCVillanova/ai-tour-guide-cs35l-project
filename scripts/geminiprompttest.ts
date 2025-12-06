@@ -1,5 +1,5 @@
-import { GEMINI_KEY } from '@env';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GEMINI_KEY } from "@env";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 // import Config from 'react-native-config';
 //import dotenv from 'react-native-dotenv';
 //require('react-native-dotenv').config({path: '../.env'})
@@ -18,10 +18,10 @@ const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 // Keep track of which specific sites have already been used
 const usedSites = new Set<string>();
-export function clearSites(){
+export function clearSites() {
   usedSites.clear();
 }
-export async function warmGemini(){
+export async function warmGemini() {
   const warm = await model.generateContent("send me only the word hello");
   return warm;
 }
@@ -29,9 +29,7 @@ export async function run(places: any) {
   // Turn our usedSites into a readable list for the prompt
   const usedSitesList = Array.from(usedSites);
   const usedSitesText =
-    usedSitesList.length > 0
-      ? usedSitesList.join(', ')
-      : 'none yet';
+    usedSitesList.length > 0 ? usedSitesList.join(", ") : "none yet";
   console.log("used sites: " + usedSitesText);
   const prompt = `
 You are generating narration for a walking tour.
@@ -69,17 +67,19 @@ ${places}
   if (rawText === "NO_NEW_SITE") {
     return "";
   }
-  
 
   // Expect first line = place name, second line = blurb
-  const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const lines = rawText
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
 
   if (lines.length === 0) {
     return "";
   }
 
   const placeName = lines[0];
-  const blurb = lines.slice(1).join(' ').trim();
+  const blurb = lines.slice(1).join(" ").trim();
 
   if (usedSites.has(placeName)) {
     return "";
@@ -90,15 +90,12 @@ ${places}
   console.log("place name: " + placeName);
 
   // What the UI / TTS actually gets
-  const finalText = blurb
-    ? `${placeName}: ${blurb}`
-    : placeName;
+  const finalText = blurb ? `${placeName}: ${blurb}` : placeName;
 
   console.log("Gemini (processed):\n", finalText);
 
   return finalText;
 }
-
 
 export async function generateTour(places: any) {
   // Turn our usedSites into a readable list for the prompt
@@ -141,24 +138,24 @@ ${JSON.stringify(places, null, 2)}
   if (rawText === "NO_NEW_SITE") {
     return "";
   }
-  
 
   // Expect first line = place name, second line = blurb
-  const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const lines = rawText
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
 
   if (lines.length === 0) {
     return "";
   }
 
   const placeName = lines[0];
-  const blurb = lines.slice(1).join(' ').trim();
+  const blurb = lines.slice(1).join(" ").trim();
 
   console.log("place name: " + placeName);
 
   // What the UI / TTS actually gets
-  const finalText = blurb
-    ? `${placeName}: ${blurb}`
-    : placeName;
+  const finalText = blurb ? `${placeName}: ${blurb}` : placeName;
 
   console.log("Gemini (processed):\n", finalText);
 

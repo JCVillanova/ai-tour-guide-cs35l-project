@@ -1,24 +1,25 @@
-import { ThemedText } from '@/components/themed-text';
 import { ThemedTextInput } from '@/components/themed-text-input';
-import { ThemedView } from '@/components/themed-view';
-import { ThemedButton } from '@/components/ui/themed-button';
-import { Fonts } from '@/constants/theme';
-import { clearSites, run, warmGemini } from '@/scripts/geminiprompttest';
-import { GetPlacesInRadius } from '@/scripts/google-maps-util';
-import * as Location from 'expo-location';
-import * as Speech from 'expo-speech';
-import React, { useEffect, useRef, useState } from 'react';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedTextInput } from "@/components/themed-text-input";
+import { ThemedView } from "@/components/themed-view";
+import { ThemedButton } from "@/components/ui/themed-button";
+import { Fonts } from "@/constants/theme";
+import { clearSites, run, warmGemini } from "@/scripts/geminiprompttest";
+import { GetPlacesInRadius } from "@/scripts/google-maps-util";
+import * as Location from "expo-location";
+import * as Speech from "expo-speech";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ImageBackground,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  View
-} from 'react-native';
-import MapView, { Circle, PROVIDER_GOOGLE } from 'react-native-maps';
+  View,
+} from "react-native";
+import MapView, { Circle, PROVIDER_GOOGLE } from "react-native-maps";
 
-import Explore from '../../assets/images/explore.png';
+import Explore from "../../assets/images/explore.png";
 
 export default function TourScreen() {
   const [tourOn, setTourOn] = useState(false);
@@ -44,18 +45,20 @@ export default function TourScreen() {
   } | null>(null);
 
   // ref with latest coords for interval / Gemini
-  const coordsRef = useRef<{ latitude: number; longitude: number } | null>(null);
+  const coordsRef = useRef<{ latitude: number; longitude: number } | null>(
+    null
+  );
   useEffect(() => {
     coordsRef.current = currentCoords;
   }, [currentCoords]);
 
   // Range in meters for circle radius and prompt
   const [rangeMeters, setRangeMeters] = useState<number>(30);
-  const [rangeInput, setRangeInput] = useState<string>('30');
+  const [rangeInput, setRangeInput] = useState<string>("30");
 
   // prompt cooldown in seconds
   const [promptIntervalSec, setPromptIntervalSec] = useState<number>(5);
-  const [promptIntervalInput, setPromptIntervalInput] = useState<string>('5');
+  const [promptIntervalInput, setPromptIntervalInput] = useState<string>("5");
 
   const mapRef = useRef<MapView | null>(null);
   const watchRef = useRef<Location.LocationSubscription | null>(null);
@@ -91,24 +94,25 @@ export default function TourScreen() {
           const name = p.name || p.vicinity || p.formatted_address;
           return `${i + 1}. ${name ?? JSON.stringify(p)}`;
         })
-        .join('\n');
+        .join("\n");
     } else {
-      placesText = 'No nearby places found.';
+      placesText = "No nearby places found.";
     }
-    try{
+    try {
       const geminiPrompt = await run(placesText);
-      if (geminiPrompt === '') {
+      if (geminiPrompt === "") {
         return;
       }
       setInfoBlocks((infoBlocks) => [...infoBlocks, geminiPrompt]);
-    }catch (e) {// catch network missing errors caused by walking around
+    } catch (e) {
+      // catch network missing errors caused by walking around
       console.warn("Gemini network error:", e);
     }
   };
 
   const startTour = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') return;
+    if (status !== "granted") return;
 
     setTourOn(true);
 
@@ -271,8 +275,8 @@ export default function TourScreen() {
           <ThemedView style={styles.exploreContainer}>
             <ThemedButton
               onPress={startTour}
-              content='Start Exploring'
-              size='large'
+              content="Start Exploring"
+              size="large"
               style={{}}
             />
           </ThemedView>
@@ -314,7 +318,9 @@ export default function TourScreen() {
 
           <ThemedView style={styles.controlsContainer}>
             <ThemedView style={styles.controlGroup}>
-              <ThemedText style={styles.controlLabel}>Range (meters):</ThemedText>
+              <ThemedText style={styles.controlLabel}>
+                Range (meters):
+              </ThemedText>
               <ThemedTextInput
                 style={styles.controlInput}
                 keyboardType="numeric"
@@ -326,7 +332,9 @@ export default function TourScreen() {
             </ThemedView>
 
             <ThemedView style={styles.controlGroup}>
-              <ThemedText style={styles.controlLabel}>Prompt time (seconds):</ThemedText>
+              <ThemedText style={styles.controlLabel}>
+                Prompt time (seconds):
+              </ThemedText>
               <ThemedTextInput
                 style={styles.controlInput}
                 keyboardType="numeric"
@@ -344,7 +352,7 @@ export default function TourScreen() {
               contentContainerStyle={styles.infoScrollContent}
             >
               {infoBlocks.map((block, index) => (
-                <View key={index} style={styles.infoBlock}>
+                <View key={index} style={styles.infoBlock} testID="info-block">
                   <Text style={styles.infoText}>{block}</Text>
                 </View>
               ))}
@@ -358,10 +366,10 @@ export default function TourScreen() {
 
 const styles = StyleSheet.create({
   exploreContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    backgroundColor: "rgba(0, 0, 0, 0.65)",
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   exploreTitle: {
     fontFamily: Fonts.rounded,
@@ -369,19 +377,19 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   centerArea: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 32,
   },
   primaryBtn: {
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderRadius: 12,
-    backgroundColor: '#1a73e8',
+    backgroundColor: "#1a73e8",
   },
   primaryBtnText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
     fontSize: 16,
   },
   tourContainer: {
@@ -389,65 +397,65 @@ const styles = StyleSheet.create({
   },
   mapContainer: {
     flex: 1,
-    position: 'relative',
+    position: "relative",
   },
   controlsContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderTopWidth: 1,
-    borderTopColor: '#333',
+    borderTopColor: "#333",
     gap: 12,
   },
   controlGroup: {
     flex: 1,
   },
   controlLabel: {
-    color: '#ccc',
+    color: "#ccc",
     fontSize: 12,
     marginBottom: 0,
   },
   controlInput: {
-    backgroundColor: '#222',
+    backgroundColor: "#222",
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
     borderWidth: 1,
-    borderColor: '#444',
+    borderColor: "#444",
   },
   endBtn: {
-    position: 'absolute',
+    position: "absolute",
     top: 50,
     right: 20,
-    backgroundColor: '#ff0000ff',
+    backgroundColor: "#ff0000ff",
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 12,
   },
   endBtnText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
   },
   infoBlock: {
     padding: 12,
-    borderColor: 'white',
+    borderColor: "white",
     borderRadius: 12,
     borderWidth: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
   },
   infoBullet: {
     marginRight: 8,
     marginTop: 2,
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 16,
   },
   infoContainer: {
     flex: 1, // bottom half
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderTopWidth: 1,
-    borderTopColor: '#444',
+    borderTopColor: "#444",
   },
   infoScroll: {
     flex: 1,
@@ -458,7 +466,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     flex: 1,
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 14,
   },
 });
