@@ -44,16 +44,18 @@ npm install
 cd server
 npm install
 ```
+NOTE - due to eduroam and UCLA wifi, there are connection issues between the computer server and the client.
+In order to properly connect the two, you will have to be off the UCLA wifi - during our testing, we had to do this by connecting to a hotspot.
+In backendcalls.ts inside of the scripts folder, you will have to edit the following line:
+```
+let SERVER_URL = "http://{your_ip_address}:3000";
+```
+This should be the ip address of the computer running the server. You can make get your ip address with the following on windows:
+```
+ipconfig
+```
+Make sure that it is on the same wifi network(or hotspot) as the actual phone when you run this.
 
-in order to run the actual app, do the following:
-```
-npx expo start --tunnel
-```
-and to start the server, do:
-```
-cd server
-npm run dev
-```
 
 # Development
 To set up the development system for Expo Go (connects from a phone) run the following command in the root director.
@@ -67,3 +69,4 @@ $ npm run dev
 ```
 
 This should fully set up the app, allowing it to run properly if everything is set up correctly.
+
