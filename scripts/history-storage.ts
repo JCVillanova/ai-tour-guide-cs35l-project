@@ -1,5 +1,7 @@
 // src/scripts/history-storage.ts
-const SERVER_URL = "http://<YOUR-IP-OR-TUNNEL-URL>"; 
+import { SERVERURL } from "@env";
+const SERVER_URL = SERVERURL;
+
 export type TourRecord = {
   title: string;
   startingPoint: string;
