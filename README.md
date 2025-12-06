@@ -37,8 +37,11 @@ GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_KEY
 ATLAS_URI=YOUR_MONGODB_URI
 PORT=3000
 ```
-Note to TAs - we will send you all of this information
-run the following commands:
+
+> [!NOTE]
+To TAs - we will send you all of this information
+
+Run the following commands:
 ```
 npm install
 cd server
