@@ -40,6 +40,8 @@ GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_KEY
 ATLAS_URI=YOUR_MONGODB_URI
 PORT=3000
 ```
+> [!NOTE]
+When running on an android device, it isn't able to read the Gemini key so replace the reading from env file with the hardcoded gemini key.
 
 > [!NOTE]
 To TAs - we will send you all of this information.
@@ -79,12 +81,13 @@ $ npm run dev
 
 This should fully set up the app, allowing it to run properly if everything is set up correctly.
 
-To run tests:
+To run tests please switch to testing-branch and run:
 ```
 $ npx run jest
 ```
 
 Presentation Link (featuring a video demo): https://docs.google.com/presentation/d/1l7gn0csWJ4jAGzpuT3A7S7yaNt5S-Y4JP0AOrlOCV8Y/edit?usp=sharing
+
 
 
 
