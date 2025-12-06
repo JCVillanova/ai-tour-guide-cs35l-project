@@ -44,6 +44,7 @@ interface TourInProgressUIProps {
   points: Array<{ latitude: number; longitude: number }>;
 }
 
+// Screen that shows a button to begin the touring process
 function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
   return (
     <ImageBackground
@@ -70,6 +71,7 @@ function InitialScreen({ onHandleState }: { onHandleState: () => void }) {
   );
 }
 
+// Search screen which allows users to select a destination
 function SearchUI({ onHandleState, handleTextChange, searchResults }: SearchUIProps) {
   return (
     <ThemedView
@@ -124,6 +126,7 @@ function SearchUI({ onHandleState, handleTextChange, searchResults }: SearchUIPr
   );
 }
 
+// Confirms a selected destination as a "middle man" before the actual tour starts
 function TourConfirmationUI({ destination, setTourAwaitingConfirm, setTourInProgress, CenterMap }: TourConfirmationUIProps) {
   return (
     <ThemedView
@@ -191,11 +194,12 @@ function TourConfirmationUI({ destination, setTourAwaitingConfirm, setTourInProg
   );
 }
 
+// Displays Gemini output when a tour is happening
 function TourInProgressUI({ destination, setTourInProgress, points }: TourInProgressUIProps) {
   const { userName } = useAuth();
 
   const [infoBlocks, setInfoBlocks] = useState<string[]>([]);
-  const [rawOutput, setRawOutput] = useState('');
+  const [rawGeminiOutput, setRawGeminiOutput] = useState('');
   const [hasStartedTTS, setHasStartedTTS] = useState(false);
   const cancelRef = useRef(false);
 
@@ -205,15 +209,15 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
     generateTour(points).then((output) => {
       if (!output) return;
 
-      setRawOutput(output);
+      setRawGeminiOutput(output); // Needed to pass the output to history (it is split manually on that file)
       const delimiter = "====================";
-      const formatted = output.split(delimiter).map(s => s.trim()).filter(Boolean);
+      const formattedGeminiOutput = output.split(delimiter).map(s => s.trim()).filter(Boolean); // Split output into blocks
 
-      setInfoBlocks(formatted);
+      setInfoBlocks(formattedGeminiOutput);
     });
   }
 
-  //tts loop
+  // Make TTS read each block of Gemini output in sequence
   function speakBlock(index: number) {
     if (cancelRef.current || index >= infoBlocks.length) {
       return;
@@ -230,7 +234,7 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
       },onStopped: () => {return;},onError: () => {return;},});
   }
 
-  // Start tts when first get infoblocks
+  // Start TTS once Gemini output has displayed
   useEffect(() => {
     if (infoBlocks.length > 0 && !hasStartedTTS) {
       setHasStartedTTS(true);
@@ -238,7 +242,7 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
     }
   }, [infoBlocks, hasStartedTTS]);
 
-  // Cleanup functions for tts
+  // Cleanup functions for TTS
   useEffect(() => {
     return () => {
       cancelRef.current = true;
@@ -247,26 +251,25 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
     };
   }, []);
 
+  // End the current tour and save it to history (assuming the user is logged in)
   const handleExit = async () => {
-  if (userName) {
-    const tourRecord = {
-      title: `Tour to ${destination}`,
-      startingPoint: "Current Location",
-      destination: destination,
-      geminiOutput: rawOutput, // full Gemini text
-      date: new Date().toLocaleDateString(),
-    };
+    if (userName) {
+      const tourRecord = {
+        title: `Tour to ${destination}`,
+        startingPoint: "Current Location",
+        destination: destination,
+        geminiOutput: rawGeminiOutput, // full Gemini text
+        date: new Date().toLocaleDateString(),
+      };
 
-    await saveTourToHistory(userName, tourRecord);
-  }
+      await saveTourToHistory(userName, tourRecord);
+    }
 
-  cancelRef.current = true;
-  Speech.stop();
-  tourGenerated = false;
-  setTourInProgress(false);
-};
-
-
+    cancelRef.current = true;
+    Speech.stop();
+    tourGenerated = false;
+    setTourInProgress(false);
+  };
 
   return (
     <ThemedView style={{
@@ -324,6 +327,7 @@ function TourInProgressUI({ destination, setTourInProgress, points }: TourInProg
   );
 }
 
+// Entire screen containing the map on top and either SearchUI, TourConfirmationUI, or TourInProgressUI on the bottom
 function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState<ReactNode | null>(null);
@@ -332,11 +336,13 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
   const [tourAwaitingConfirm, setTourAwaitingConfirm] = useState(false);
   const [tourInProgress, setTourInProgress] = useState(false);
 
+  // Array of locations along the route
   const [routeCoordinates, setRouteCoordinates] = useState<Array<{ latitude: number, longitude: number }>>([]);
+
   const [destination, setDestination] = useState('');
   const [mapCentered, setMapCentered] = useState(false);
 
-  // current gps coords
+  // Current GPS coordinates
   const [currentCoords, setCurrentCoords] = useState<{
     latitude: number;
     longitude: number;
@@ -354,6 +360,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
     };
   }, []);
 
+  // Set up a route from the user's current location to their selected destination
   const getDirections = async (startLoc: string, destinationLoc: string) => {
     try {
       const KEY = checkApiKey();
@@ -365,7 +372,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
           headers: {
             'Content-Type': 'application/json',
             'X-Goog-Api-Key': KEY,
-            'X-Goog-FieldMask': 'routes.polyline.encodedPolyline' // We only ask for the polyline
+            'X-Goog-FieldMask': 'routes.polyline.encodedPolyline' // Only ask for the polyline
           },
           body: JSON.stringify({
             origin: {
@@ -417,6 +424,31 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
     }
   };
 
+  // Set the map's position and zoom to be focused on the user's current location
+  async function CenterMap() {
+    watchRef.current = await Location.watchPositionAsync(
+      {
+        accuracy: Location.Accuracy.High,
+        timeInterval: 1000,
+        distanceInterval: 1,
+      },
+      (location) => {
+        const { latitude, longitude } = location.coords;
+        mapRef.current?.animateCamera(
+          {
+            center: { latitude, longitude },
+            zoom: 16,
+            heading: 0,
+            pitch: 0,
+          },
+          { duration: 500 }
+        );
+        setMapCentered(true);
+      }
+    );
+  }
+
+  // Open the tour interface
   const startTourInterface = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') return;
@@ -429,49 +461,20 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
         timeInterval: 1000,
         distanceInterval: 1,
       },
-      (loc) => {
-        const { latitude, longitude } = loc.coords;
+      (location) => {
+        const { latitude, longitude } = location.coords;
 
         setCurrentCoords({ latitude, longitude });
 
+        // Center map once upon opening this screen
         if (!mapCentered) {
-          mapRef.current?.animateCamera(
-            {
-              center: { latitude, longitude },
-              zoom: 16,
-              heading: 0,
-              pitch: 0,
-            },
-            { duration: 500 }
-          );
-          setMapCentered(true);
+          CenterMap();
         }
       }
     );
   };
 
-  async function CenterMap() {
-    watchRef.current = await Location.watchPositionAsync(
-      {
-        accuracy: Location.Accuracy.High,
-        timeInterval: 1000,
-        distanceInterval: 1,
-      },
-      (loc) => {
-        const { latitude, longitude } = loc.coords;
-        mapRef.current?.animateCamera(
-          {
-            center: { latitude, longitude },
-            zoom: 16,
-            heading: 0,
-            pitch: 0,
-          },
-          { duration: 500 }
-        );
-      }
-    );
-  }
-
+  // Exit the tour interface and shut down anything related
   const endTourInterface = () => {
     watchRef.current?.remove();
     watchRef.current = null;
@@ -480,16 +483,20 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
     Speech.stop();
   };
 
+  // Assign each search result a name and address
   type SearchResultItem = {
     name: string;
     address: string;
   };
 
+  // Take the user input and search using the Google Maps API, then rearrange the data for our purposes
   async function handleSearch(text: string) {
-    // Search for results
-    const ret = await searchQuery(text);
-    const places = Array.isArray(ret) ? ret : [];
+    // Search for locations
+    const searchResult = await searchQuery(text);
+    const places = Array.isArray(searchResult) ? searchResult : [];
     const resultsData: SearchResultItem[] = [];
+
+    // Format data from places into resultsData as SearchResultItems
     places.forEach((place) => {
       const name = place?.displayName?.text || "Unknown Place";
       const address = place?.formattedAddress || "No Address";
@@ -498,6 +505,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
 
     let resultsDisplay: ReactNode | null = null;
 
+    // Set up state variables for a route to be generated after a search result is selected
     function SelectSearchResult(item: SearchResultItem) {
       console.log("Selected a search result: " + item.name);
       if (currentCoords != null) {
@@ -543,9 +551,9 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
     setSearchResults(resultsDisplay);
   }
 
+  // Pass user input into handleSearch
   function handleTextChange(text: string) {
     setSearchText(text);
-    console.log('Changed search text to "' + text + '"');
     handleSearch(text);
   }
 
@@ -589,7 +597,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
           )}
           <Polyline
             coordinates={routeCoordinates}
-            strokeColor="#682cad" // Fallback color
+            strokeColor="blue" // Fallback color
             strokeWidth={7}
           />
           {endPoint && (
@@ -623,6 +631,7 @@ function MapIntegratedScreen({ onHandleState }: { onHandleState: () => void }) {
 function DynamicTour() {
   const [planStarted, setPlanStarted] = useState(false);
 
+  // Logic to go between InitialScreen and MapIntegratedScreen
   function HandleState() {
     if (planStarted)
       setPlanStarted(false);
