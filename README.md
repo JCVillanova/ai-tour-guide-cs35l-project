@@ -79,7 +79,13 @@ $ npm run dev
 
 This should fully set up the app, allowing it to run properly if everything is set up correctly.
 
+To run tests:
+```
+npx run jest
+```
 
 Presentation Link (featuring a video demo): https://docs.google.com/presentation/d/1l7gn0csWJ4jAGzpuT3A7S7yaNt5S-Y4JP0AOrlOCV8Y/edit?usp=sharing
+
+
 
 
